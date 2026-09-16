@@ -35,6 +35,17 @@ class AuthController extends Controller {
         $this->view('auth/register', $data);
     }
 
+    public function lupa() {
+        // Jika user sudah login, tendang ke Beranda (Auth Guard)
+        if (isset($_SESSION['user_id'])) {
+            header('Location: /anvo/public/');
+            exit;
+        }
+
+        $data['judul'] = 'Pemulihan Akun - ANVO';
+        $this->view('auth/lupa', $data);
+    }
+
     // --- 1. PROSES PENDAFTARAN ---
     public function proses_register() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {

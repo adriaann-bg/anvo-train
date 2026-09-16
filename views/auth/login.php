@@ -60,7 +60,7 @@
                         <input type="checkbox" id="ingat" class="w-4 h-4 text-[#8C6239] border-gray-300 rounded focus:ring-[#8C6239] cursor-pointer">
                         <label for="ingat" class="text-xs text-gray-500 cursor-pointer select-none">Ingat saya</label>
                     </div>
-                    <a href="#" class="text-xs text-[#2B9BFB] font-medium hover:underline">Lupa password?</a>
+                    <a href="/anvo/public/auth/lupa" class="text-xs text-[#2B9BFB] font-medium hover:underline">Lupa password?</a>
                 </div>
 
                 <button type="submit" class="w-full bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl mt-4">
