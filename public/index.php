@@ -6,7 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Memanggil file-file inti (Core) dan Konfigurasi
+// PERBAIKAN ZONA WAKTU: Pastikan PHP menggunakan waktu Indonesia (WIB)
+date_default_timezone_set('Asia/Jakarta');
+
+// 1. PANGGIL AUTOLOADER COMPOSER DI SINI (Wajib di atas file core)
+require_once '../vendor/autoload.php';
+
+// Memanggil file-file inti (Core) dan Konfigurasi bawaanmu
 require_once '../app/Config/Database.php';
 require_once '../app/Core/Controller.php';
 require_once '../app/Core/App.php';

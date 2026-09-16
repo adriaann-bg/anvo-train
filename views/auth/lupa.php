@@ -17,58 +17,107 @@
             100% { transform: translate(-50%, 0); opacity: 1; }
         }
         .animate-bounce-short { animation: bounceShort 0.4s ease-out forwards; }
+
+        /* Menghilangkan panah spinner pada input number di berbagai browser */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield; /* Untuk Firefox */
+        }
     </style>
 </head>
 <body class="bg-[#0F172A] min-h-screen flex items-center justify-center p-4 lg:p-8">
 
     <div class="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
         
-        <!-- Kolom Kiri: Form Lupa Akun -->
+        <!-- Kolom Kiri: Form Lupa Akun / Hasil Pencarian -->
         <div class="w-full md:w-1/2 p-8 lg:p-14 flex flex-col justify-center relative">
             
             <!-- Tombol Kembali -->
-            <a href="/anvo/public/auth/login" class="absolute top-8 left-8 text-gray-400 hover:text-[#8C6239] transition-colors flex items-center gap-2 text-sm font-medium">
+            <a href="/anvo/public/auth/batal_lupa" class="absolute top-8 left-8 text-gray-400 hover:text-[#8C6239] transition-colors flex items-center gap-2 text-sm font-medium">
                 <i class="fa-solid fa-arrow-left"></i> Kembali
             </a>
 
-            <div class="text-center mb-10 mt-6">
-                <div class="w-16 h-16 bg-blue-50 text-[#2B9BFB] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-shield-halved text-2xl"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-[#0F172A] mb-2">Pemulihan Akun</h1>
-                <p class="text-gray-500 text-sm leading-relaxed px-4">Masukkan 3 lapis data keamanan di bawah ini untuk memverifikasi kepemilikan akun Anda.</p>
-            </div>
-
-            <form action="/anvo/public/auth/proses_lupa" method="POST" class="space-y-5">
+            <?php if(isset($_SESSION['recovery_data'])): ?>
                 
-                <div>
-                    <label class="text-xs text-gray-500 block mb-1.5 ml-1">NIK (Sesuai KTP)</label>
-                    <input type="number" name="nik" placeholder="Masukkan 16 Digit NIK" required 
-                           class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
+                <!-- TAMPILAN 2: DATA DITEMUKAN -->
+                <div class="text-center mb-8 mt-6">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+                        <i class="fa-solid fa-check text-3xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-[#0F172A] mb-2">Akun Ditemukan!</h1>
+                    <p class="text-gray-500 text-sm">Berikut adalah sebagian data kontak Anda yang terdaftar.</p>
                 </div>
 
-                <div>
-                    <label class="text-xs text-gray-500 block mb-1.5 ml-1">Nama Lengkap</label>
-                    <input type="text" name="nama" placeholder="Masukkan Nama Sesuai KTP" required 
-                           class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8 space-y-4">
+                    <div>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nama Pemilik</p>
+                        <p class="text-sm font-semibold text-[#0F172A]"><?= htmlspecialchars($_SESSION['recovery_data']['nama']) ?></p>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Email Terdaftar</p>
+                        <p class="text-sm font-semibold text-[#8C6239]"><?= htmlspecialchars($_SESSION['recovery_data']['email']) ?></p>
+                    </div>
+                    <hr class="border-gray-200">
+                    <div>
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">No. Telepon Terdaftar</p>
+                        <p class="text-sm font-semibold text-[#8C6239]"><?= htmlspecialchars($_SESSION['recovery_data']['no_hp']) ?></p>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="text-xs text-gray-500 block mb-1.5 ml-1">Tanggal Lahir</label>
-                    <input type="date" name="tanggal_lahir" required 
-                           class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-gray-500">
+                <a href="/anvo/public/auth/batal_lupa" class="w-full text-center block bg-[#0F172A] hover:bg-gray-800 text-white py-4 rounded-2xl font-semibold transition-all shadow-lg mb-3">
+                    Ingat Sekarang? Masuk
+                </a>
+                <a href="/anvo/public/auth/reset_password" class="w-full text-center block bg-white border-2 border-[#8C6239] text-[#8C6239] hover:bg-orange-50 py-3.5 rounded-2xl font-semibold transition-all">
+                    Reset Password
+                </a>
+
+            <?php else: ?>
+                
+                <!-- TAMPILAN 1: FORM PENCARIAN -->
+                <div class="text-center mb-10 mt-6">
+                    <div class="w-16 h-16 bg-blue-50 text-[#2B9BFB] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-shield-halved text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-[#0F172A] mb-2">Pemulihan Akun</h1>
+                    <p class="text-gray-500 text-sm leading-relaxed px-4">Masukkan 3 lapis data keamanan di bawah ini untuk memverifikasi kepemilikan akun Anda.</p>
                 </div>
 
-                <button type="submit" class="w-full bg-[#0F172A] hover:bg-gray-800 text-white py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl mt-6">
-                    <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari Akun Saya
-                </button>
-            </form>
+                <form action="/anvo/public/auth/proses_lupa" method="POST" class="space-y-5">
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1.5 ml-1">NIK (Sesuai KTP)</label>
+                        <input type="number" name="nik" placeholder="Masukkan 16 Digit NIK" required 
+                               class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1.5 ml-1">Nama Lengkap</label>
+                        <input type="text" name="nama" placeholder="Masukkan Nama Sesuai KTP" required 
+                               class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-500 block mb-1.5 ml-1">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" required 
+                               class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-gray-500">
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl mt-4">
+                        <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari Akun Saya
+                    </button>
+                </form>
+
+            <?php endif; ?>
 
             <!-- Jalur Manual: Customer Care WhatsApp -->
             <div class="mt-8 pt-6 border-t border-gray-100 text-center">
                 <p class="text-xs text-gray-500 mb-3">Kehilangan akses ke semua data Anda?</p>
-                <!-- Nanti href-nya bisa diisi dengan link wa.me yang terintegrasi WhatsApp Business Quick Replies -->
-                <a href="#" class="inline-flex items-center justify-center gap-2 text-sm text-[#25D366] bg-[#25D366]/10 hover:bg-[#25D366]/20 px-6 py-2.5 rounded-full font-semibold transition-colors">
+                <!-- URL WA disesuaikan untuk workflow quick response -->
+                <a href="https://wa.me/6281234567890?text=Halo%20Customer%20Care%20ANVO,%20saya%20kehilangan%20akses%20akun%20saya%20dan%20membutuhkan%20bantuan%20pemulihan%20manual." target="_blank" class="inline-flex items-center justify-center gap-2 text-sm text-[#25D366] bg-[#25D366]/10 hover:bg-[#25D366]/20 px-6 py-2.5 rounded-full font-semibold transition-colors">
                     <i class="fa-brands fa-whatsapp text-lg"></i> Hubungi Customer Care
                 </a>
             </div>

@@ -76,7 +76,7 @@
                             </div>
                             <hr class="border-gray-100">
                             <div class="p-2">
-                                <a href="/anvo/public/auth/logout" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                <a href="/anvo/public/auth/logout" onclick="confirmLogout(event)" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
                                     <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-2"></i> Keluar
                                 </a>
                             </div>
@@ -163,6 +163,26 @@
 
     <main class="flex-grow">
 
+    <?php if (isset($_SESSION['success'])): ?>
+        <div id="toast-success" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center w-full max-w-md p-4 text-gray-700 bg-white rounded-2xl shadow-2xl border-l-4 border-emerald-500 transition-all duration-500">
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-emerald-500 bg-emerald-50 rounded-xl">
+                <i class="fa-solid fa-check-circle text-xl"></i>
+            </div>
+            <div class="ml-4 text-sm font-medium leading-relaxed"><?= $_SESSION['success'] ?></div>
+        </div>
+        <script>
+            setTimeout(() => {
+                const toast = document.getElementById('toast-success');
+                if(toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translate(-50%, -20px)';
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 3000);
+        </script>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+    
     <!-- Script Vanilla JS untuk Navbar Behavior -->
     <script>
         // Logika Scroll
@@ -204,4 +224,11 @@
                 document.getElementById('profile-menu').classList.add('hidden');
             }
         });
+
+        function confirmLogout(e) {
+            e.preventDefault(); // Mencegah klik langsung pindah halaman
+            if (confirm("Apakah Anda yakin ingin keluar dari akun ANVO?")) {
+                window.location.href = "/anvo/public/auth/logout";
+            }
+        }
     </script>

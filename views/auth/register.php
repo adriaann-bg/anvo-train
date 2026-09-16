@@ -45,22 +45,22 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="text-xs text-gray-500 block mb-1.5 ml-1">Nama Lengkap</label>
-                        <input type="text" name="nama" placeholder="Masukkan Nama Sesuai KTP" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
+                        <input type="text" name="nama" value="<?= isset($_SESSION['old']['nama']) ? htmlspecialchars($_SESSION['old']['nama']) : '' ?>" placeholder="Masukkan Nama Sesuai KTP" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 block mb-1.5 ml-1">NIK (Sesuai KTP)</label>
-                        <input type="text" name="nik" placeholder="Masukkan 16 Digit NIK" required maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
+                        <input type="text" name="nik" value="<?= isset($_SESSION['old']['nik']) ? htmlspecialchars($_SESSION['old']['nik']) : '' ?>" placeholder="Masukkan 16 Digit NIK" required maxlength="16" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="text-xs text-gray-500 block mb-1.5 ml-1">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all text-[#0F172A] bg-gray-50/50 hover:bg-white">
+                        <input type="date" name="tanggal_lahir" value="<?= isset($_SESSION['old']['tanggal_lahir']) ? htmlspecialchars($_SESSION['old']['tanggal_lahir']) : '' ?>" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all text-[#0F172A] bg-gray-50/50 hover:bg-white">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 block mb-1.5 ml-1">Email</label>
-                        <input type="email" name="email" placeholder="Masukkan Email" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
+                        <input type="email" name="email" value="<?= isset($_SESSION['old']['email']) ? htmlspecialchars($_SESSION['old']['email']) : '' ?>" placeholder="Masukkan Email" required class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white">
                     </div>
                 </div>
 
@@ -92,9 +92,7 @@
                         </div>
                         
                         <!-- Input Nomor -->
-                        <input type="text" name="no_hp" id="input-nomor" placeholder="Contoh: 81234567890" required 
-                               oninput="cleanPhoneNumber(this)" 
-                               class="w-full px-4 py-3.5 text-sm focus:outline-none bg-transparent rounded-r-2xl text-[#0F172A]">
+                        <input type="text" name="no_hp" id="input-nomor" value="<?= isset($_SESSION['old']['no_hp']) ? htmlspecialchars($_SESSION['old']['no_hp']) : '' ?>" placeholder="Contoh: 81234567890" required oninput="cleanPhoneNumber(this)" class="w-full px-4 py-3.5 text-sm focus:outline-none bg-transparent rounded-r-2xl text-[#0F172A]">
                     </div>
                 </div>
 
@@ -133,14 +131,15 @@
                         <label class="text-xs text-gray-500 block mb-1.5 ml-1">Konfirmasi Password</label>
                         <div class="relative flex items-center">
                             <!-- id="password_confirm" -->
-                            <input type="password" name="password_confirm" id="password_confirm" placeholder="Konfirmasi Password" required 
-                                   class="w-full border border-gray-200 rounded-2xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
+                            <input type="password" name="password_confirm" id="password_confirm" oninput="checkMatch()" placeholder="Konfirmasi Password" required class="w-full border border-gray-200 rounded-2xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:border-[#8C6239] focus:ring-2 focus:ring-[#8C6239]/20 transition-all bg-gray-50/50 hover:bg-white text-[#0F172A]">
                             
                             <!-- Toggle untuk id="password_confirm" dan id="eye_icon_2" -->
                             <button type="button" onclick="togglePasswordVisibility('password_confirm', 'eye_icon_2')" class="absolute right-4 text-gray-400 hover:text-[#8C6239] transition-colors focus:outline-none">
                                 <i id="eye_icon_2" class="fa-regular fa-eye-slash text-sm"></i>
                             </button>
                         </div>
+                        <!-- Teks peringatan yang disembunyikan secara default -->
+                        <p id="match-warning" class="text-red-500 text-[10px] mt-1 ml-1 hidden"><i class="fa-solid fa-triangle-exclamation"></i> Password tidak sama!</p>
                     </div>
                 </div>
 
@@ -149,7 +148,7 @@
                     <label for="syarat" class="text-xs text-gray-500 cursor-pointer select-none">Saya setuju dengan <a href="#" class="text-[#8C6239] font-medium hover:underline">syarat dan ketentuan</a></label>
                 </div>
 
-                <button type="submit" class="w-full bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl mt-4">
+                <button type="submit" id="btn-submit" disabled class="w-full bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white py-4 rounded-2xl font-semibold transition-all shadow-lg hover:shadow-xl mt-4">
                     Daftar Akun
                 </button>
             </form>
@@ -280,7 +279,7 @@
             input.value = cleaned;
         }
 
-        // FUNGSI DETEKSI KEKUATAN PASSWORD REAL-TIME
+        // Fungsi Indikator Kekuatan & Validasi Menyeluruh
         function checkPasswordStrength(password) {
             const bar = document.getElementById('strength-bar');
             const text = document.getElementById('strength-text');
@@ -290,7 +289,6 @@
 
             let strength = 0;
 
-            // 1. Cek Minimal 8 Karakter
             if (password.length >= 8) {
                 strength += 1;
                 reqLength.classList.replace('text-gray-400', 'text-emerald-500');
@@ -298,7 +296,6 @@
                 reqLength.classList.replace('text-emerald-500', 'text-gray-400');
             }
 
-            // 2. Cek Huruf Besar & Kecil
             if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
                 strength += 1;
                 reqCase.classList.replace('text-gray-400', 'text-emerald-500');
@@ -306,7 +303,6 @@
                 reqCase.classList.replace('text-emerald-500', 'text-gray-400');
             }
 
-            // 3. Cek Karakter Khusus
             if (password.match(/[^a-zA-Z\d]/)) {
                 strength += 1;
                 reqSpecial.classList.replace('text-gray-400', 'text-emerald-500');
@@ -314,7 +310,6 @@
                 reqSpecial.classList.replace('text-emerald-500', 'text-gray-400');
             }
 
-            // Animasi Warna Bar & Teks
             if (password.length === 0) {
                 bar.style.width = '0%';
                 text.innerText = '';
@@ -334,7 +329,56 @@
                 text.innerText = 'Kuat';
                 text.className = 'text-[10px] font-bold w-12 text-right text-emerald-500';
             }
+
+            validateForm();
         }
+
+        function checkMatch() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+            const warning = document.getElementById('match-warning');
+            
+            if (confirm.length > 0 && pass !== confirm) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            validateForm();
+        }
+
+        // FUNGSI UTAMA: Mengatur hidup/matinya tombol Daftar
+        function validateForm() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+            const syarat = document.getElementById('syarat').checked;
+            const btnSubmit = document.getElementById('btn-submit');
+
+            // Cek syarat kekuatan password (minimal 8, ada huruf besar/kecil, ada simbol)
+            const isLengthValid = pass.length >= 8;
+            const isCaseValid = /([a-z].*[A-Z])|([A-Z].*[a-z])/.test(pass);
+            const isSpecialValid = /[^a-zA-Z\d]/.test(pass);
+            const isMatch = pass === confirm && confirm.length > 0;
+
+            // Jika semua syarat mutlak terpenuhi
+            if (isLengthValid && isCaseValid && isSpecialValid && isMatch && syarat) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnSubmit.classList.add('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
+            } else {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                btnSubmit.classList.remove('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
+            }
+        }
+
+        // Pasang event listener untuk checkbox syarat
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxSyarat = document.getElementById('syarat');
+            if (checkboxSyarat) {
+                checkboxSyarat.addEventListener('change', validateForm);
+            }
+        });
 
         // Auto-hide script (hilang dalam 5 detik)
         setTimeout(() => {
@@ -361,6 +405,19 @@
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
                 icon.classList.remove('text-[#8C6239]');
+            }
+        }
+
+        function checkMatch() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+            const warning = document.getElementById('match-warning');
+            
+            // Tampilkan peringatan jika tidak sama dan kolom konfirmasi tidak kosong
+            if (confirm.length > 0 && pass !== confirm) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
             }
         }
     </script>

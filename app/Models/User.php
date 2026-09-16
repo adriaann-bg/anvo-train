@@ -53,5 +53,58 @@ class User {
         
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    // 4. Fungsi Validasi 3 Lapis untuk Lupa Akun
+    public function verifyRecovery($nik, $nama, $tanggal_lahir) {
+        // Pencarian harus cocok persis ketiga-tiganya untuk keamanan
+        $sql = "SELECT * FROM users WHERE nik = :nik AND nama = :nama AND tanggal_lahir = :tanggal_lahir LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        
+        $stmt->bindParam(':nik', $nik);
+        $stmt->bindParam(':nama', $nama);
+        $stmt->bindParam(':tanggal_lahir', $tanggal_lahir);
+        
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // 5. Simpan Kode OTP ke Database
+    public function setOTP($nik, $otp, $expire) {
+        $sql = "UPDATE users SET reset_token = :otp, token_expire = :expire WHERE nik = :nik";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':otp', $otp);
+        $stmt->bindParam(':expire', $expire);
+        $stmt->bindParam(':nik', $nik); 
+        return $stmt->execute();
+    }
+
+    // 6. Validasi OTP (Cek kecocokan dan apakah belum kedaluwarsa)
+    public function verifyOTP($nik, $otp) {
+        // Cek token expire yang masih lebih besar dari waktu saat ini (NOW)
+        $sql = "SELECT * FROM users WHERE nik = :nik AND reset_token = :otp AND token_expire > NOW() LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':nik', $nik);
+        $stmt->bindParam(':otp', $otp);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getUserByNik($nik) {
+        $sql = "SELECT * FROM users WHERE nik = :nik LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':nik', $nik);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // 7. Update Password Baru
+    public function updatePassword($nik, $password_hashed) {
+        $sql = "UPDATE users SET password = :password WHERE nik = :nik";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':password', $password_hashed);
+        $stmt->bindParam(':nik', $nik);
+        return $stmt->execute();
+    }
 }
 ?>
