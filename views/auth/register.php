@@ -174,254 +174,6 @@
         </div>
     </div>
 
-    <!-- Script Custom Dropdown Negara -->
-    <script>
-        const countryDataStr = "AF|Afghanistan|افغانستان|+93,AL|Albania|Shqipëria|+355,DZ|Algeria|الجزائر|+213,AD|Andorra|Andorra|+376,AO|Angola|Angola|+244,AR|Argentina|Argentina|+54,AM|Armenia|Հայաստան|+374,AU|Australia|Australia|+61,AT|Austria|Österreich|+43,AZ|Azerbaijan|Azərbaycan|+994,BH|Bahrain|البحرين|+973,BD|Bangladesh|বাংলাদেশ|+880,BY|Belarus|Беларусь|+375,BE|Belgium|België|+32,BZ|Belize|Belize|+501,BJ|Benin|Bénin|+229,BT|Bhutan|འབྲུག་ཡུལ|+975,BO|Bolivia|Bolivia|+591,BA|Bosnia and Herzegovina|Bosna i Hercegovina|+387,BW|Botswana|Botswana|+267,BR|Brazil|Brasil|+55,BN|Brunei|Brunei|+673,BG|Bulgaria|България|+359,KH|Cambodia|កម្ពុជា|+855,CM|Cameroon|Cameroun|+237,CA|Canada|Canada|+1,CL|Chile|Chile|+56,CN|China|中国|+86,CO|Colombia|Colombia|+57,CD|Congo (DRC)|Jamhuri|+243,CR|Costa Rica|Costa Rica|+506,HR|Croatia|Hrvatska|+385,CU|Cuba|Cuba|+53,CY|Cyprus|Κύπρος|+357,CZ|Czechia|Česko|+420,DK|Denmark|Danmark|+45,EC|Ecuador|Ecuador|+593,EG|Egypt|مصر|+20,FI|Finland|Suomi|+358,FR|France|France|+33,GE|Georgia|საქართველო|+995,DE|Germany|Deutschland|+49,GR|Greece|Ελλάδα|+30,HK|Hong Kong|香港|+852,HU|Hungary|Magyarország|+36,IS|Iceland|Ísland|+354,IN|India|भारत|+91,ID|Indonesia|Indonesia|+62,IR|Iran|ایران|+98,IQ|Iraq|العراق|+964,IE|Ireland|Éire|+353,IL|Israel|ישראל|+972,IT|Italy|Italia|+39,JM|Jamaica|Jamaica|+1,JP|Japan|日本|+81,JO|Jordan|الأردن|+962,KZ|Kazakhstan|Қазақстан|+7,KE|Kenya|Kenya|+254,KP|North Korea|북한|+850,KR|South Korea|대한민국|+82,KW|Kuwait|الكويت|+965,LA|Laos|ລາວ|+856,LB|Lebanon|لبنان|+961,LY|Libya|ليبيا|+218,MY|Malaysia|Malaysia|+60,MV|Maldives|Maldives|+960,MX|Mexico|México|+52,MA|Morocco|المغرب|+212,MM|Myanmar|မြန်မာ|+95,NP|Nepal|नेपाल|+977,NL|Netherlands|Nederland|+31,NZ|New Zealand|New Zealand|+64,NG|Nigeria|Nigeria|+234,NO|Norway|Norge|+47,OM|Oman|عُمان|+968,PK|Pakistan|پاکستان|+92,PS|Palestine|فلسطين|+970,PA|Panama|Panamá|+507,PE|Peru|Perú|+51,PH|Philippines|Pilipinas|+63,PL|Poland|Polska|+48,PT|Portugal|Portugal|+351,QA|Qatar|قطر|+974,RO|Romania|România|+40,RU|Russia|Россия|+7,SA|Saudi Arabia|السعودية|+966,RS|Serbia|Србија|+381,SG|Singapore|Singapura|+65,ZA|South Africa|South Africa|+27,ES|Spain|España|+34,LK|Sri Lanka|ශ්‍රී ලංකාව|+94,SE|Sweden|Sverige|+46,CH|Switzerland|Schweiz|+41,SY|Syria|سوريا|+963,TW|Taiwan|台灣|+886,TH|Thailand|ประเทศไทย|+66,TR|Turkey|Türkiye|+90,AE|United Arab Emirates|الإمارات|+971,GB|United Kingdom|United Kingdom|+44,US|United States|United States|+1,VN|Vietnam|Việt Nam|+84,YE|Yemen|اليمن|+967,ZW|Zimbabwe|Zimbabwe|+263";
-
-        // KAMUS MASIF: Format Panjang Digit Asli Ratusan Negara
-        const placeholderFormats = {
-            'ID': '81234567890', 'SG': '81234567', 'MY': '123456789', 
-            'CN': '13912345678', 'JP': '9012345678', 'US': '2025550123', 
-            'GB': '7700900123', 'VN': '912345678', 'TH': '812345678',
-            'IN': '9876543210', 'BR': '11987654321', 'RU': '9123456789',
-            'DE': '15123456789', 'FR': '612345678', 'KR': '1012345678',
-            'TW': '912345678', 'PH': '9123456789', 'AU': '412345678',
-            'SA': '512345678', 'AE': '501234567', 'ZA': '601234567',
-            'IT': '3123456789', 'ES': '612345678', 'TR': '5012345678',
-            'CA': '4165550123', 'MX': '5512345678', 'AR': '1123456789',
-            'CO': '3001234567', 'CL': '912345678', 'PE': '912345678',
-            'NG': '8012345678', 'KE': '712345678', 'EG': '1012345678',
-            'MA': '612345678', 'DZ': '551234567', 'PK': '3012345678',
-            'BD': '1712345678', 'LK': '712345678', 'NP': '9812345678',
-            'MM': '912345678', 'KH': '12345678', 'LA': '2012345678',
-            'BN': '8123456', 'HK': '61234567', 'NZ': '211234567',
-            'FI': '401234567', 'SE': '701234567', 'NO': '41234567',
-            'DK': '20123456', 'NL': '612345678', 'BE': '471234567',
-            'CH': '791234567', 'AT': '6641234567', 'PL': '501234567',
-            'CZ': '601234567', 'HU': '301234567', 'RO': '712345678',
-            'GR': '6912345678', 'PT': '912345678', 'IE': '851234567',
-            'IL': '501234567', 'IR': '9123456789', 'IQ': '7901234567',
-            'JO': '791234567', 'LB': '3123456', 'SY': '931234567',
-            'QA': '33123456', 'KW': '61234567', 'OM': '91234567',
-            'BH': '39123456', 'AF': '701234567'
-        };
-
-        const countries = countryDataStr.split(',').map(item => {
-            const [code, name, nativeName, dialCode] = item.split('|');
-            return {
-                code: code,
-                name: name,
-                nativeName: nativeName,
-                dialCode: dialCode,
-                flagUrl: `https://flagcdn.com/w20/${code.toLowerCase()}.png`,
-                // Fallback otomatis jika negara tidak ada di list atas (rata-rata dunia = 9 digit)
-                placeholder: placeholderFormats[code] || '123456789' 
-            };
-        });
-
-        const listEl = document.getElementById('country-list');
-        countries.forEach(country => {
-            const li = document.createElement('li');
-            li.className = "px-4 py-2.5 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors border-b border-gray-50 last:border-0";
-            li.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <img src="${country.flagUrl}" class="w-5 h-auto rounded-sm shadow-sm mt-1" alt="${country.code}">
-                    <div class="flex flex-col">
-                        <span class="country-name text-sm text-[#0F172A] font-medium leading-tight">${country.name}</span>
-                        <span class="text-[11px] text-gray-400 font-light mt-0.5 leading-none">${country.nativeName}</span>
-                    </div>
-                </div>
-                <span class="text-gray-500 font-semibold text-xs">${country.dialCode}</span>
-            `;
-            li.onclick = () => selectCountry(country);
-            listEl.appendChild(li);
-        });
-
-        function toggleCountryMenu() {
-            document.getElementById('country-menu').classList.toggle('hidden');
-        }
-
-        function selectCountry(country) {
-            document.getElementById('selected-code').innerText = country.code;
-            document.getElementById('selected-dial').innerText = country.dialCode; 
-            document.getElementById('input-kode-negara').value = country.dialCode; 
-            
-            // Ajaib! Placeholder langsung berubah sesuai format negara yang dipilih
-            document.getElementById('input-nomor').placeholder = `Contoh: ${country.placeholder}`;
-            
-            toggleCountryMenu();
-        }
-
-        function filterCountry(input) {
-            const filter = input.value.toUpperCase();
-            const lis = listEl.getElementsByTagName('li');
-            for (let i = 0; i < lis.length; i++) {
-                let name = lis[i].querySelector('.country-name').textContent;
-                if (name.toUpperCase().indexOf(filter) > -1) {
-                    lis[i].style.display = "";
-                } else {
-                    lis[i].style.display = "none";
-                }
-            }
-        }
-
-        document.addEventListener('click', (e) => {
-            if(!document.getElementById('country-dropdown-wrapper').contains(e.target)) {
-                document.getElementById('country-menu').classList.add('hidden');
-            }
-        });
-
-        function cleanPhoneNumber(input) {
-            let cleaned = input.value.replace(/[^0-9]/g, '');
-            if(cleaned.startsWith('0')) {
-                cleaned = cleaned.substring(1);
-            }
-            input.value = cleaned;
-        }
-
-        // Fungsi Indikator Kekuatan & Validasi Menyeluruh
-        function checkPasswordStrength(password) {
-            const bar = document.getElementById('strength-bar');
-            const text = document.getElementById('strength-text');
-            const reqLength = document.getElementById('req-length');
-            const reqCase = document.getElementById('req-case');
-            const reqSpecial = document.getElementById('req-special');
-
-            let strength = 0;
-
-            if (password.length >= 8) {
-                strength += 1;
-                reqLength.classList.replace('text-gray-400', 'text-emerald-500');
-            } else {
-                reqLength.classList.replace('text-emerald-500', 'text-gray-400');
-            }
-
-            if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
-                strength += 1;
-                reqCase.classList.replace('text-gray-400', 'text-emerald-500');
-            } else {
-                reqCase.classList.replace('text-emerald-500', 'text-gray-400');
-            }
-
-            if (password.match(/[^a-zA-Z\d]/)) {
-                strength += 1;
-                reqSpecial.classList.replace('text-gray-400', 'text-emerald-500');
-            } else {
-                reqSpecial.classList.replace('text-emerald-500', 'text-gray-400');
-            }
-
-            if (password.length === 0) {
-                bar.style.width = '0%';
-                text.innerText = '';
-            } else if (strength === 1) {
-                bar.style.width = '33%';
-                bar.className = 'h-full transition-all duration-300 bg-red-500';
-                text.innerText = 'Lemah';
-                text.className = 'text-[10px] font-bold w-12 text-right text-red-500';
-            } else if (strength === 2) {
-                bar.style.width = '66%';
-                bar.className = 'h-full transition-all duration-300 bg-yellow-500';
-                text.innerText = 'Sedang';
-                text.className = 'text-[10px] font-bold w-12 text-right text-yellow-500';
-            } else if (strength === 3) {
-                bar.style.width = '100%';
-                bar.className = 'h-full transition-all duration-300 bg-emerald-500';
-                text.innerText = 'Kuat';
-                text.className = 'text-[10px] font-bold w-12 text-right text-emerald-500';
-            }
-
-            validateForm();
-        }
-
-        function checkMatch() {
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('password_confirm').value;
-            const warning = document.getElementById('match-warning');
-            
-            if (confirm.length > 0 && pass !== confirm) {
-                warning.classList.remove('hidden');
-            } else {
-                warning.classList.add('hidden');
-            }
-
-            validateForm();
-        }
-
-        // FUNGSI UTAMA: Mengatur hidup/matinya tombol Daftar
-        function validateForm() {
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('password_confirm').value;
-            const syarat = document.getElementById('syarat').checked;
-            const btnSubmit = document.getElementById('btn-submit');
-
-            // Cek syarat kekuatan password (minimal 8, ada huruf besar/kecil, ada simbol)
-            const isLengthValid = pass.length >= 8;
-            const isCaseValid = /([a-z].*[A-Z])|([A-Z].*[a-z])/.test(pass);
-            const isSpecialValid = /[^a-zA-Z\d]/.test(pass);
-            const isMatch = pass === confirm && confirm.length > 0;
-
-            // Jika semua syarat mutlak terpenuhi
-            if (isLengthValid && isCaseValid && isSpecialValid && isMatch && syarat) {
-                btnSubmit.disabled = false;
-                btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnSubmit.classList.add('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
-            } else {
-                btnSubmit.disabled = true;
-                btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
-                btnSubmit.classList.remove('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
-            }
-        }
-
-        // Pasang event listener untuk checkbox syarat
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkboxSyarat = document.getElementById('syarat');
-            if (checkboxSyarat) {
-                checkboxSyarat.addEventListener('change', validateForm);
-            }
-        });
-
-        // Auto-hide script (hilang dalam 5 detik)
-        setTimeout(() => {
-            const toast = document.getElementById('toast-alert');
-            if (toast) {
-                toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                toast.style.opacity = '0';
-                toast.style.transform = 'translate(-50%, -20px)';
-                setTimeout(() => toast.remove(), 500); // Hapus elemen dari DOM setelah animasi fade out selesai
-            }
-        }, 5000);
-
-        function togglePasswordVisibility(inputId, iconId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-                icon.classList.add('text-[#8C6239]'); // Beri warna aktif
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-                icon.classList.remove('text-[#8C6239]');
-            }
-        }
-
-        function checkMatch() {
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('password_confirm').value;
-            const warning = document.getElementById('match-warning');
-            
-            // Tampilkan peringatan jika tidak sama dan kolom konfirmasi tidak kosong
-            if (confirm.length > 0 && pass !== confirm) {
-                warning.classList.remove('hidden');
-            } else {
-                warning.classList.add('hidden');
-            }
-        }
-    </script>
-
     <!-- ========================================== -->
     <!-- FLASH MESSAGE (TOAST NOTIFICATION) AWAL  -->
     <!-- ========================================== -->
@@ -456,5 +208,191 @@
     <!-- ========================================== -->
     <!-- FLASH MESSAGE (TOAST NOTIFICATION) AKHIR -->
     <!-- ========================================== -->
+
+    <!-- Script Mata & Kekuatan Password -->
+    <script>
+        const countryDataStr = "AF|Afghanistan|افغانستان|+93,AL|Albania|Shqipëria|+355,DZ|Algeria|الجزائر|+213,AD|Andorra|Andorra|+376,AO|Angola|Angola|+244,AR|Argentina|Argentina|+54,AM|Armenia|Հայաստան|+374,AU|Australia|Australia|+61,AT|Austria|Österreich|+43,AZ|Azerbaijan|Azərbaycan|+994,BH|Bahrain|البحرين|+973,BD|Bangladesh|বাংলাদেশ|+880,BY|Belarus|Беларусь|+375,BE|Belgium|België|+32,BZ|Belize|Belize|+501,BJ|Benin|Bénin|+229,BT|Bhutan|འབྲugཡུལ|+975,BO|Bolivia|Bolivia|+591,BA|Bosnia and Herzegovina|Bosna i Hercegovina|+387,BW|Botswana|Botswana|+267,BR|Brazil|Brasil|+55,BN|Brunei|Brunei|+673,BG|Bulgaria|България|+359,KH|Cambodia|កម្ពុជា|+855,CM|Cameroon|Cameroun|+237,CA|Canada|Canada|+1,CL|Chile|Chile|+56,CN|China|中国|+86,CO|Colombia|Colombia|+57,CD|Congo (DRC)|Jamhuri|+243,CR|Costa Rica|Costa Rica|+506,HR|Croatia|Hrvatska|+385,CU|Cuba|Cuba|+53,CY|Cyprus|Κύπρος|+357,CZ|Czechia|Česko|+420,DK|Denmark|Danmark|+45,EC|Ecuador|Ecuador|+593,EG|Egypt|مصر|+20,FI|Finland|Suomi|+358,FR|France|France|+33,GE|Georgia|საქართველო|+995,DE|Germany|Deutschland|+49,GR|Greece|Ελλάδα|+30,HK|Hong Kong|香港|+852,HU|Hungary|Magyarország|+36,IS|Iceland|Ísland|+354,IN|India|भारत|+91,ID|Indonesia|Indonesia|+62,IR|Iran|ایران|+98,IQ|Iraq|العراق|+964,IE|Ireland|Éire|+353,IL|Israel|ישראל|+972,IT|Italy|Italia|+39,JM|Jamaica|Jamaica|+1,JP|Japan|日本|+81,JO|Jordan|الأردن|+962,KZ|Kazakhstan|Қазақстан|+7,KE|Kenya|Kenya|+254,KP|North Korea|북한|+850,KR|South Korea|대한민국|+82,KW|Kuwait|الكويت|+965,LA|Laos|ລາວ|+856,LB|Lebanon|لبنان|+961,LY|Libya|ليبيا|+218,MY|Malaysia|Malaysia|+60,MV|Maldives|Maldives|+960,MX|Mexico|México|+52,MA|Morocco|المغرب|+212,MM|Myanmar|မြန်မာ|+95,NP|Nepal|नेपाल|+977,NL|Netherlands|Nederland|+31,NZ|New Zealand|New Zealand|+64,NG|Nigeria|Nigeria|+234,NO|Norway|Norge|+47,OM|Oman|عُمان|+968,PK|Pakistan|پاکستان|+92,PS|Palestine|فلسطين|+970,PA|Panama|Panamá|+507,PE|Peru|Perú|+51,PH|Philippines|Pilipinas|+63,PL|Poland|Polska|+48,PT|Portugal|Portugal|+351,QA|Qatar|قطر|+974,RO|Romania|România|+40,RU|Russia|Россия|+7,SA|Saudi Arabia|السعودية|+966,RS|Serbia|Србија|+381,SG|Singapore|Singapura|+65,ZA|South Africa|South Africa|+27,ES|Spain|España|+34,LK|Sri Lanka|ශ්‍රී ලංකාව|+94,SE|Sweden|Sverige|+46,CH|Switzerland|Schweiz|+41,SY|Syria|سوريا|+963,TW|Taiwan|台灣|+886,TH|Thailand|ประเทศไทย|+66,TR|Turkey|Türkiye|+90,AE|United Arab Emirates|الإمارات|+971,GB|United Kingdom|United Kingdom|+44,US|United States|United States|+1,VN|Vietnam|Việt Nam|+84,YE|Yemen|اليمن|+967,ZW|Zimbabwe|Zimbabwe|+263";
+
+        const placeholderFormats = {
+            'ID': '81234567890', 'SG': '81234567', 'MY': '123456789', 
+            'CN': '13912345678', 'JP': '9012345678', 'US': '2025550123', 
+            'GB': '7700900123', 'VN': '912345678', 'TH': '812345678',
+            'IN': '9876543210', 'BR': '11987654321', 'RU': '9123456789',
+            'DE': '15123456789', 'FR': '612345678', 'KR': '1012345678'
+        };
+
+        const countries = countryDataStr.split(',').map(item => {
+            const [code, name, nativeName, dialCode] = item.split('|');
+            return {
+                code: code, name: name, nativeName: nativeName, dialCode: dialCode,
+                flagUrl: `https://flagcdn.com/w20/${code.toLowerCase()}.png`,
+                placeholder: placeholderFormats[code] || '123456789' 
+            };
+        });
+
+        const listEl = document.getElementById('country-list');
+        countries.forEach(country => {
+            const li = document.createElement('li');
+            li.className = "px-4 py-2.5 hover:bg-gray-50 cursor-pointer flex justify-between items-center transition-colors border-b border-gray-50 last:border-0";
+            li.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <img src="${country.flagUrl}" class="w-5 h-auto rounded-sm shadow-sm mt-1" alt="${country.code}">
+                    <div class="flex flex-col">
+                        <span class="country-name text-sm text-[#0F172A] font-medium leading-tight">${country.name}</span>
+                        <span class="text-[11px] text-gray-400 font-light mt-0.5 leading-none">${country.nativeName}</span>
+                    </div>
+                </div>
+                <span class="text-gray-500 font-semibold text-xs">${country.dialCode}</span>
+            `;
+            li.onclick = () => selectCountry(country);
+            listEl.appendChild(li);
+        });
+
+        function toggleCountryMenu() {
+            document.getElementById('country-menu').classList.toggle('hidden');
+        }
+
+        function selectCountry(country) {
+            document.getElementById('selected-code').innerText = country.code;
+            document.getElementById('selected-dial').innerText = country.dialCode; 
+            document.getElementById('input-kode-negara').value = country.dialCode; 
+            document.getElementById('input-nomor').placeholder = `Contoh: ${country.placeholder}`;
+            toggleCountryMenu();
+        }
+
+        function filterCountry(input) {
+            const filter = input.value.toUpperCase();
+            const lis = listEl.getElementsByTagName('li');
+            for (let i = 0; i < lis.length; i++) {
+                let name = lis[i].querySelector('.country-name').textContent;
+                lis[i].style.display = (name.toUpperCase().indexOf(filter) > -1) ? "" : "none";
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if(!document.getElementById('country-dropdown-wrapper').contains(e.target)) {
+                document.getElementById('country-menu').classList.add('hidden');
+            }
+        });
+
+        function cleanPhoneNumber(input) {
+            let cleaned = input.value.replace(/[^0-9]/g, '');
+            if(cleaned.startsWith('0')) { cleaned = cleaned.substring(1); }
+            input.value = cleaned;
+        }
+
+        // Fungsi Indikator Kekuatan Password
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('strength-bar');
+            const text = document.getElementById('strength-text');
+            const reqLength = document.getElementById('req-length');
+            const reqCase = document.getElementById('req-case');
+            const reqSpecial = document.getElementById('req-special');
+
+            let strength = 0;
+
+            if (password.length >= 8) {
+                strength += 1;
+                reqLength.classList.replace('text-gray-400', 'text-emerald-500');
+            } else {
+                reqLength.classList.replace('text-emerald-500', 'text-gray-400');
+            }
+
+            if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) {
+                strength += 1;
+                reqCase.classList.replace('text-gray-400', 'text-emerald-500');
+            } else {
+                reqCase.classList.replace('text-emerald-500', 'text-gray-400');
+            }
+
+            if (password.match(/[^a-zA-Z\d]/)) {
+                strength += 1;
+                reqSpecial.classList.replace('text-gray-400', 'text-emerald-500');
+            } else {
+                reqSpecial.classList.replace('text-emerald-500', 'text-gray-400');
+            }
+
+            if (password.length === 0) {
+                bar.style.width = '0%';
+                if(text) text.innerText = '';
+            } else if (strength === 1) {
+                bar.style.width = '33%';
+                bar.className = 'h-full transition-all duration-300 bg-red-500';
+                if(text) { text.innerText = 'Lemah'; text.className = 'text-[10px] font-bold w-12 text-right text-red-500'; }
+            } else if (strength === 2) {
+                bar.style.width = '66%';
+                bar.className = 'h-full transition-all duration-300 bg-yellow-500';
+                if(text) { text.innerText = 'Sedang'; text.className = 'text-[10px] font-bold w-12 text-right text-yellow-500'; }
+            } else if (strength === 3) {
+                bar.style.width = '100%';
+                bar.className = 'h-full transition-all duration-300 bg-emerald-500';
+                if(text) { text.innerText = 'Kuat'; text.className = 'text-[10px] font-bold w-12 text-right text-emerald-500'; }
+            }
+
+            validateForm();
+        }
+
+        // Fungsi Cek Konfirmasi Password yang Terintegrasi
+        function checkMatch() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+            const warning = document.getElementById('match-warning');
+            
+            if (confirm.length > 0 && pass !== confirm) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            validateForm();
+        }
+
+        // FUNGSI UTAMA: Mengatur hidup/matinya tombol Daftar
+        function validateForm() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
+            const syarat = document.getElementById('syarat').checked;
+            const btnSubmit = document.getElementById('btn-submit');
+
+            const isLengthValid = pass.length >= 8;
+            const hasUppercase = /[A-Z]/.test(pass);
+            const hasLowercase = /[a-z]/.test(pass);
+            const hasSpecial = /[^a-zA-Z\d]/.test(pass);
+            const isMatch = (pass === confirm) && (confirm.length > 0);
+
+            // Jika semua syarat mutlak terpenuhi, aktifkan tombol!
+            if (isLengthValid && hasUppercase && hasLowercase && hasSpecial && isMatch && syarat) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnSubmit.classList.add('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
+            } else {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                btnSubmit.classList.remove('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxSyarat = document.getElementById('syarat');
+            if (checkboxSyarat) {
+                checkboxSyarat.addEventListener('change', validateForm);
+            }
+        });
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+                icon.classList.add('text-[#8C6239]');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+                icon.classList.remove('text-[#8C6239]');
+            }
+        }
+    </script>
 </body>
 </html>

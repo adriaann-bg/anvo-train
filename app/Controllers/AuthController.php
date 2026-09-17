@@ -300,11 +300,11 @@ class AuthController extends Controller {
         try {
             // Konfigurasi SMTP Brevo
             $mail->isSMTP();
-            // Isi dengan server SMTP Brevo yang valid
+            // Ganti dengan host SMTP Brevo yang sesuai
 
             // Pengirim & Penerima
-            // Gunakan email resmi ANVO untuk pengiriman
-            $mail->addAddress($email_asli, $userData['nama']);
+            $mail->setFrom('syahputraadrian5011@gmail.com', 'ANVO Security');
+            // Ganti dengan email penerima yang sesuai
 
             // Konten Email
             $mail->isHTML(true);

@@ -80,16 +80,19 @@
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
             if (input.type === 'password') {
-                input.type = 'text'; icon.classList.replace('fa-eye-slash', 'fa-eye'); icon.classList.add('text-[#8C6239]');
+                input.type = 'text'; 
+                icon.classList.replace('fa-eye-slash', 'fa-eye'); 
+                icon.classList.add('text-[#8C6239]');
             } else {
-                input.type = 'password'; icon.classList.replace('fa-eye', 'fa-eye-slash'); icon.classList.remove('text-[#8C6239]');
+                input.type = 'password'; 
+                icon.classList.replace('fa-eye', 'fa-eye-slash'); 
+                icon.classList.remove('text-[#8C6239]');
             }
         }
 
         // Fungsi Indikator Kekuatan & Validasi Menyeluruh
         function checkPasswordStrength(password) {
             const bar = document.getElementById('strength-bar');
-            const text = document.getElementById('strength-text');
             const reqLength = document.getElementById('req-length');
             const reqCase = document.getElementById('req-case');
             const reqSpecial = document.getElementById('req-special');
@@ -117,29 +120,24 @@
                 reqSpecial.classList.replace('text-emerald-500', 'text-gray-400');
             }
 
+            // Animasi Warna Bar
             if (password.length === 0) {
                 bar.style.width = '0%';
-                text.innerText = '';
             } else if (strength === 1) {
                 bar.style.width = '33%';
                 bar.className = 'h-full transition-all duration-300 bg-red-500';
-                text.innerText = 'Lemah';
-                text.className = 'text-[10px] font-bold w-12 text-right text-red-500';
             } else if (strength === 2) {
                 bar.style.width = '66%';
                 bar.className = 'h-full transition-all duration-300 bg-yellow-500';
-                text.innerText = 'Sedang';
-                text.className = 'text-[10px] font-bold w-12 text-right text-yellow-500';
             } else if (strength === 3) {
                 bar.style.width = '100%';
                 bar.className = 'h-full transition-all duration-300 bg-emerald-500';
-                text.innerText = 'Kuat';
-                text.className = 'text-[10px] font-bold w-12 text-right text-emerald-500';
             }
 
             validateForm();
         }
 
+        // Fungsi Cek Konfirmasi Password yang Terintegrasi
         function checkMatch() {
             const pass = document.getElementById('password').value;
             const confirm = document.getElementById('password_confirm').value;
@@ -154,20 +152,19 @@
             validateForm();
         }
 
-        // FUNGSI UTAMA: Mengatur hidup/matinya tombol Daftar
+        // FUNGSI UTAMA: Mengatur hidup/matinya tombol Simpan
         function validateForm() {
             const pass = document.getElementById('password').value;
             const confirm = document.getElementById('password_confirm').value;
             const btnSubmit = document.getElementById('btn-submit');
 
-            // Pengecekan standar yang lebih akurat
             const isLengthValid = pass.length >= 8;
-            const hasUppercase = /[A-Z]/.test(pass); // Memastikan ada minimal 1 huruf besar
-            const hasLowercase = /[a-z]/.test(pass); // Memastikan ada minimal 1 huruf kecil
-            const hasSpecial = /[^a-zA-Z\d]/.test(pass); // Memastikan ada minimal 1 simbol
+            const hasUppercase = /[A-Z]/.test(pass);
+            const hasLowercase = /[a-z]/.test(pass);
+            const hasSpecial = /[^a-zA-Z\d]/.test(pass);
             const isMatch = (pass === confirm) && (confirm.length > 0);
 
-            // Semua syarat harus bernilai true
+            // Jika semua syarat mutlak terpenuhi, hidupkan tombol!
             if (isLengthValid && hasUppercase && hasLowercase && hasSpecial && isMatch) {
                 btnSubmit.disabled = false;
                 btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -176,27 +173,6 @@
                 btnSubmit.disabled = true;
                 btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
                 btnSubmit.classList.remove('hover:bg-gradient-to-r', 'hover:from-[#8C6239]', 'hover:to-[#AF8B69]', 'hover:shadow-xl');
-            }
-        }
-        
-        // Pasang event listener untuk checkbox syarat
-        document.addEventListener('DOMContentLoaded', () => {
-            const checkboxSyarat = document.getElementById('syarat');
-            if (checkboxSyarat) {
-                checkboxSyarat.addEventListener('change', validateForm);
-            }
-        });
-
-        function checkMatch() {
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('password_confirm').value;
-            const warning = document.getElementById('match-warning');
-            
-            // Tampilkan peringatan jika tidak sama dan kolom konfirmasi tidak kosong
-            if (confirm.length > 0 && pass !== confirm) {
-                warning.classList.remove('hidden');
-            } else {
-                warning.classList.add('hidden');
             }
         }
     </script>
