@@ -15,9 +15,9 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             </div>
 
             <div>
-                <button onclick="openModal('modal-tambah-jadwal')" class="bg-[#0F172A] hover:bg-[#8C6239] text-white px-5 py-3 rounded-2xl text-xs font-semibold transition-all shadow-md flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> Tambah Jadwal Baru
-                </button>
+                <a href="/anvo/public/jadwal/tambah_page" class="bg-[#0F172A] hover:bg-[#8C6239] text-white px-5 py-3 rounded-2xl text-xs font-semibold transition-all shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Buat Jadwal Baru
+                </a>
             </div>
         </header>
 
@@ -89,13 +89,14 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                 <th class="py-3.5 px-4">Rute Asal → Tujuan</th>
                                 <th class="py-3.5 px-4">Waktu & Tanggal</th>
                                 <th class="py-3.5 px-4">Harga Tiket</th>
+                                <th class="py-3.5 px-4 text-center">Map</th>
                                 <th class="py-3.5 px-4 text-center">Aksi (Detail, Edit, Crew)</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm divide-y divide-slate-50">
                             <?php if(empty($data['jadwal'])): ?>
                                 <tr>
-                                    <td colspan="7" class="py-12 text-center text-slate-400 font-medium">Tidak ada jadwal yang sesuai dengan filter pencarian.</td>
+                                    <td colspan="8" class="py-12 text-center text-slate-400 font-medium">Tidak ada jadwal yang sesuai dengan filter pencarian.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php $no = 1; foreach($data['jadwal'] as $j): ?>
@@ -111,7 +112,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-2 py-0.5 rounded-md font-bold"><?= $j['jenis_kelas'] ?></span>
                                         </td>
                                         <td class="py-4 px-4 font-semibold text-slate-700">
-                                            <?= $j['stasiun_asal'] ?> → <?= $j['stasiun_tujuan'] ?>
+                                            <?= explode(' - ', $j['stasiun_asal'])[0] ?> &rarr; <?= explode(' - ', $j['stasiun_tujuan'])[0] ?>
                                         </td>
                                         <td class="py-4 px-4">
                                             <span class="font-bold text-slate-800 block"><?= $j['jam_berangkat'] ?> - <?= $j['jam_tiba'] ?> WIB</span>
@@ -120,21 +121,25 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                         <td class="py-4 px-4 font-bold text-[#8C6239]">
                                             Rp <?= number_format($j['harga'], 0, ',', '.') ?>
                                         </td>
+                                        
+                                        <!-- Tombol Modal MAP -->
+                                        <td class="py-4 px-4 text-center">
+                                            <button onclick="openModal('modal-map-<?= $j['id_jadwal'] ?>')" class="w-10 h-10 bg-indigo-50 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl text-sm transition-all shadow-sm flex items-center justify-center mx-auto" title="Lihat Peta Rute">
+                                                <i class="fa-solid fa-map-location-dot"></i>
+                                            </button>
+                                        </td>
+
                                         <td class="py-4 px-4 text-center">
                                             <div class="flex items-center justify-center gap-1.5">
-                                                <!-- Tombol Detail -->
                                                 <button onclick="openModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Detail">
                                                     <i class="fa-solid fa-circle-info"></i> Detail
                                                 </button>
-                                                <!-- Tombol Edit -->
                                                 <button onclick="openModal('modal-edit-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-amber-50 text-[#8C6239] hover:bg-[#8C6239] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Edit">
                                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </button>
-                                                <!-- Tombol Penugasan Crew -->
                                                 <button onclick="openModal('modal-crew-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-semibold transition-all" title="Penugasan Crew">
                                                     <i class="fa-solid fa-user-shield"></i> Crew
                                                 </button>
-                                                <!-- Tombol Hapus -->
                                                 <a href="/anvo/public/jadwal/hapus/<?= $j['id_jadwal'] ?>" onclick="return confirm('Hapus jadwal ini?')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
@@ -142,7 +147,74 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                         </td>
                                     </tr>
 
-                                    <!-- MODAL POPUP: DETAIL JADWAL -->
+                                    <!-- MODAL POPUP: MAP RUTE KHUSUS JADWAL INI -->
+                                    <div id="modal-map-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                                        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar border border-slate-200/60">
+                                            <div class="flex justify-between items-start border-b border-slate-100 pb-4">
+                                                <div class="flex items-center gap-4">
+                                                    <img src="/anvo/public/img/logo-anvo-berwarna.svg" alt="ANVO" class="w-10 h-10 object-contain">
+                                                    <div>
+                                                        <span class="text-[10px] uppercase font-bold text-[#8C6239] tracking-wider block">Official Route Map</span>
+                                                        <h3 class="font-extrabold text-xl text-[#0F172A]">Jadwal #<?= $j['id_jadwal'] ?>: <?= explode(' - ', $j['stasiun_asal'])[0] ?> - <?= explode(' - ', $j['stasiun_tujuan'])[0] ?></h3>
+                                                    </div>
+                                                </div>
+                                                <button onclick="closeModal('modal-map-<?= $j['id_jadwal'] ?>')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                                            </div>
+                                            
+                                            <?php 
+                                            // Kalkulasi Array Transit vs Stasiun yang di-skip
+                                            $transitData = json_decode($j['stasiun_transit'], true);
+                                            if(!is_array($transitData)) {
+                                                $transitData = [$j['stasiun_asal'], $j['stasiun_tujuan']];
+                                            }
+                                            $fullStasiun = $j['full_stasiun'] ?? [];
+                                            
+                                            // Cari perbedaan (Stasiun yang ada di koridor tapi tidak masuk di stasiun transit)
+                                            $skippedStasiun = array_diff($fullStasiun, $transitData);
+                                            ?>
+
+                                            <!-- Peta Linier -->
+                                            <div class="space-y-3 relative pt-2">
+                                                <h5 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4">Linier Rute Perjalanan</h5>
+                                                <div class="p-6 bg-slate-50/80 rounded-3xl border border-slate-200/60 space-y-4 relative pl-8 before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-[#8C6239]">
+                                                    <?php foreach($transitData as $index => $tst): 
+                                                        $isAkhir = ($index == count($transitData) - 1);
+                                                    ?>
+                                                        <div class="relative flex items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-200/60 shadow-sm">
+                                                            <div class="absolute -left-8 w-3 h-3 rounded-full bg-[#8C6239] border-2 border-slate-50 ring-2 ring-[#8C6239]/20"></div>
+                                                            <span class="font-bold text-sm text-[#0F172A]"><?= htmlspecialchars($tst) ?></span>
+                                                            
+                                                            <?php if($index == 0): ?>
+                                                                <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg font-bold">Berangkat</span>
+                                                            <?php elseif($isAkhir): ?>
+                                                                <span class="text-[10px] bg-rose-50 text-rose-500 px-2.5 py-1 rounded-lg font-bold">Tiba</span>
+                                                            <?php else: ?>
+                                                                <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-2.5 py-1 rounded-lg font-bold">Transit Utama</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+
+                                            <!-- Kotak Khusus Stasiun yang Di-skip -->
+                                            <?php if(!empty($skippedStasiun)): ?>
+                                            <div class="mt-6 p-4 bg-slate-50 border border-slate-200 border-dashed rounded-2xl">
+                                                <span class="text-[10px] font-bold text-slate-400 block mb-2 uppercase tracking-wider"><i class="fa-solid fa-forward-step mr-1.5"></i> Langsung / Tidak Transit Di Stasiun:</span>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach($skippedStasiun as $skip): ?>
+                                                        <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg font-medium line-through">
+                                                            <?= explode(' - ', $skip)[0] ?>
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+
+                                        </div>
+                                    </div>
+                                    <!-- End Modal MAP -->
+
+                                    <!-- ... MODAL DETAIL, EDIT, CREW BAWAAN LAMA TETAP BERADA DI SINI ... -->
                                     <div id="modal-detail-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
                                         <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl space-y-4 animate-fade-in">
                                             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -152,7 +224,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <div class="space-y-2.5 text-sm text-slate-600">
                                                 <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Jenis:</span> <strong class="text-[#0F172A]"><?= $j['jenis_jadwal'] ?></strong></div>
                                                 <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Kereta:</span> <strong class="text-[#0F172A]"><?= $j['nama_kereta'] ?> (<?= $j['jenis_kelas'] ?>)</strong></div>
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Rute:</span> <strong class="text-[#0F172A]"><?= $j['stasiun_asal'] ?> → <?= $j['stasiun_tujuan'] ?></strong></div>
                                                 <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Waktu:</span> <strong class="text-[#0F172A]"><?= $j['jam_berangkat'] ?> - <?= $j['jam_tiba'] ?> WIB</strong></div>
                                                 <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Tanggal:</span> <strong class="text-[#0F172A]"><?= date('d M Y', strtotime($j['tanggal'])) ?></strong></div>
                                                 <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Tarif:</span> <strong class="text-[#8C6239]">Rp <?= number_format($j['harga'], 0, ',', '.') ?></strong></div>
@@ -160,8 +231,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <button onclick="closeModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="w-full bg-[#0F172A] text-white py-2.5 rounded-xl font-semibold text-xs">Tutup</button>
                                         </div>
                                     </div>
-
-                                    <!-- MODAL POPUP: EDIT JADWAL -->
                                     <div id="modal-edit-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
                                         <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl space-y-4 animate-fade-in">
                                             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -172,8 +241,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <button onclick="closeModal('modal-edit-<?= $j['id_jadwal'] ?>')" class="w-full bg-[#0F172A] text-white py-2.5 rounded-xl font-semibold text-xs">Tutup</button>
                                         </div>
                                     </div>
-
-                                    <!-- MODAL POPUP: PENUGASAN CREW -->
                                     <div id="modal-crew-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
                                         <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl space-y-4 animate-fade-in">
                                             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -214,7 +281,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 <button onclick="closeModal('modal-tambah-jadwal')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="/anvo/public/jadwal/tambah" method="POST" class="space-y-4">
+            <form id="form-tambah-jadwal" action="/anvo/public/jadwal/tambah" method="POST" class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Jenis Jadwal</label>
                     <select name="jenis_jadwal" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
@@ -227,7 +294,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Koridor Jalur</label>
                     <select id="filter-koridor-jadwal" name="id_koridor" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                         <option value="">-- Pilih Koridor Perjalanan --</option>
-                        <!-- Loop data koridor -->
                         <?php foreach($data['koridor_list'] ?? [] as $kor): ?>
                             <option value="<?= $kor['id_koridor'] ?>"><?= $kor['nama_koridor'] ?></option>
                         <?php endforeach; ?>
@@ -235,11 +301,9 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 </div>
 
                 <div>
-                    <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Armada Kereta (Aktif)</label>
-                    <select name="id_kereta" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
-                        <?php foreach($data['kereta'] as $k): ?>
-                            <option value="<?= $k['id_kereta'] ?>"><?= $k['nama_kereta'] ?> (<?= $k['jenis_kelas'] ?>)</option>
-                        <?php endforeach; ?>
+                    <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Armada Kereta</label>
+                    <select id="select-armada-jadwal" name="id_kereta" required disabled class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239] disabled:opacity-50 disabled:cursor-not-allowed">
+                        <option value="">-- Pilih Koridor Terlebih Dahulu --</option>
                     </select>
                 </div>
 
@@ -290,7 +354,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
         </div>
     </div>
 
-    <!-- Script Tambahan untuk Auto-Hide Alert -->
     <script>
         setTimeout(function() {
             const alertBox = document.getElementById('flash-alert');
@@ -298,12 +361,64 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 alertBox.style.opacity = '0';
                 setTimeout(() => alertBox.remove(), 500);
             }
-        }, 3000); // Alert hilang otomatis setelah 3 detik
+        }, 3000);
 
-        // Data stasiun per koridor atau pembersihan otomatis bisa diletakkan di sini
+        // 1. AJAX Mengambil Kereta Berdasarkan Koridor
         document.getElementById('filter-koridor-jadwal').addEventListener('change', function() {
             const idKoridor = this.value;
-            // Kamu bisa melakukan fetch AJAX untuk mengambil stasiun khusus koridor tersebut jika diinginkan
+            const selectArmada = document.getElementById('select-armada-jadwal');
+            
+            // Reset dropdown saat loading
+            selectArmada.innerHTML = '<option value="">-- Sedang memuat armada... --</option>';
+            selectArmada.disabled = true;
+
+            if (!idKoridor) {
+                selectArmada.innerHTML = '<option value="">-- Pilih Koridor Terlebih Dahulu --</option>';
+                return;
+            }
+
+            // Fetch data ke JadwalController
+            fetch('/anvo/public/jadwal/get_kereta_ajax/' + idKoridor)
+                .then(response => response.json())
+                .then(data => {
+                    selectArmada.innerHTML = '<option value="">-- Pilih Armada Kereta --</option>';
+                    
+                    if(data.length === 0) {
+                        selectArmada.innerHTML = '<option value="">-- Tidak ada armada terdaftar di koridor ini --</option>';
+                    } else {
+                        // Looping data kereta
+                        data.forEach(k => {
+                            const option = document.createElement('option');
+                            option.value = k.id_kereta;
+                            // Simpan status operasional di atribut custom 'data-status'
+                            option.setAttribute('data-status', k.status_operasional);
+                            
+                            // Format Text: Nama - Kecepatan - Status
+                            option.textContent = `${k.nama_kereta} (${k.kecepatan_maksimal} km/h) - Status: ${k.status_operasional}`;
+                            selectArmada.appendChild(option);
+                        });
+                        selectArmada.disabled = false; // Aktifkan dropdown
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching kereta:', err);
+                    selectArmada.innerHTML = '<option value="">-- Gagal memuat armada --</option>';
+                });
+        });
+
+        // 2. Cegah Simpan Jika Kereta Tidak Aktif
+        document.getElementById('form-tambah-jadwal').addEventListener('submit', function(e) {
+            const selectArmada = document.getElementById('select-armada-jadwal');
+            const selectedOption = selectArmada.options[selectArmada.selectedIndex];
+            
+            if (selectedOption) {
+                const status = selectedOption.getAttribute('data-status');
+                // Jika statusnya bukan Aktif, blokir proses submit!
+                if (status && status !== 'Aktif') {
+                    e.preventDefault(); // Hentikan form submit
+                    alert(`TIDAK DAPAT DISIMPAN!\n\nArmada kereta tidak dapat dijadwalkan karena sedang dalam status: [${status}].\nSilakan pilih armada yang berstatus Aktif.`);
+                }
+            }
         });
     </script>
 

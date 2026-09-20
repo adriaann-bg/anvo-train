@@ -323,6 +323,15 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <!-- Render list kelas via JS -->
                     </div>
                 </div>
+
+                <!-- BAGIAN BARU: PETA VISUAL KORIDOR ARMADA -->
+                <div class="bg-slate-50 p-5 rounded-3xl border border-slate-100 space-y-3 mt-4">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block border-b border-slate-200 pb-2">Rute Operasional Armada</span>
+                    
+                    <div id="detail-rute-armada" class="flex items-center overflow-x-auto custom-scrollbar py-2">
+                        <!-- Tampil via JS -->
+                    </div>
+                </div>
             </div>
 
             <button onclick="closeModal('modal-detail-armada')" class="w-full bg-[#0F172A] hover:bg-[#8C6239] text-white py-3 rounded-2xl font-semibold transition-all shadow-md">Tutup Detail</button>
@@ -469,22 +478,44 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             document.getElementById('detail-status').innerText = armada.status_operasional || 'Aktif';
             document.getElementById('detail-kapasitas').innerText = (armada.kapasitas_kursi || 100) + ' Kursi';
 
-            const container = document.getElementById('detail-container-kelas');
-            container.innerHTML = '';
-
+            // Render Kelas Gerbong
+            const containerKelas = document.getElementById('detail-container-kelas');
+            containerKelas.innerHTML = '';
             let kelasArr = armada.jenis_kelas_arr || JSON.parse(armada.jenis_kelas || '["Executive Prime"]');
-            let layoutArr = armada.layout_kursi_arr || JSON.parse(armada.layout_kursi || '["Executive Prime (2-2)"]');
-
-            kelasArr.forEach((kls, index) => {
-                let lay = layoutArr[index] || 'Executive Prime (2-2)';
+            kelasArr.forEach((kls) => {
                 const item = document.createElement('div');
-                item.className = 'flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200/60 text-xs';
-                item.innerHTML = `
-                    <span class="font-bold text-[#2B9BFB]"><i class="fa-solid fa-train-subway mr-1.5"></i>${kls.trim()}</span>
-                    <span class="text-slate-500 font-medium">Layout: ${lay.trim()}</span>
-                `;
-                container.appendChild(item);
+                item.className = 'bg-white px-3 py-2 rounded-lg border border-slate-200 text-xs font-bold text-[#2B9BFB] inline-block mr-2 mb-2';
+                item.innerHTML = `<i class="fa-solid fa-train-subway mr-1.5"></i>${kls.trim()}`;
+                containerKelas.appendChild(item);
             });
+
+            // Fetch & Render Peta Rute Armada
+            const ruteContainer = document.getElementById('detail-rute-armada');
+            ruteContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Memuat rute...</span>';
+            
+            if (!armada.id_koridor) {
+                ruteContainer.innerHTML = '<span class="text-xs font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-lg"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Armada ini belum ditugaskan di koridor manapun (Berada di Pool).</span>';
+            } else {
+                fetch('/anvo/public/jadwal/get_stasiun_ajax/' + armada.id_koridor)
+                    .then(r => r.json())
+                    .then(data => {
+                        ruteContainer.innerHTML = '';
+                        data.forEach((st, index) => {
+                            const isNode = document.createElement('div');
+                            isNode.className = 'flex items-center min-w-max';
+                            
+                            // Visual: Lingkaran Hijau (Dilewati) -> Garis -> Lingkaran Hijau
+                            isNode.innerHTML = `
+                                <div class="flex flex-col items-center">
+                                    <div class="w-4 h-4 rounded-full border-[3px] border-emerald-500 bg-white z-10"></div>
+                                    <span class="text-[10px] font-bold text-[#0F172A] mt-1">${st.nama_stasiun.split(' - ')[0]}</span>
+                                </div>
+                                ${index < data.length - 1 ? '<div class="w-10 sm:w-16 h-1 bg-emerald-500/30 -mt-4"></div>' : ''}
+                            `;
+                            ruteContainer.appendChild(isNode);
+                        });
+                    });
+            }
 
             openModal('modal-detail-armada');
         }

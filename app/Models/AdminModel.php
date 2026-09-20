@@ -70,14 +70,15 @@ class AdminModel {
     }
 
     public function tambahJadwal($data) {
-        $sql = "INSERT INTO jadwal (id_kereta, stasiun_asal, stasiun_tujuan, jam_berangkat, jam_tiba, harga, tanggal, jenis_jadwal) 
-                VALUES (:id_kereta, :stasiun_asal, :stasiun_tujuan, :jam_berangkat, :jam_tiba, :harga, :tanggal, :jenis_jadwal)";
+        $sql = "INSERT INTO jadwal (id_kereta, stasiun_asal, stasiun_tujuan, stasiun_transit, jam_berangkat, jam_tiba, harga, tanggal, jenis_jadwal) 
+                VALUES (:id_kereta, :stasiun_asal, :stasiun_tujuan, :stasiun_transit, :jam_berangkat, :jam_tiba, :harga, :tanggal, :jenis_jadwal)";
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             ':id_kereta' => $data['id_kereta'],
             ':stasiun_asal' => $data['stasiun_asal'],
             ':stasiun_tujuan' => $data['stasiun_tujuan'],
+            ':stasiun_transit' => $data['stasiun_transit'], // Tambahan parameter baru
             ':jam_berangkat' => $data['jam_berangkat'],
             ':jam_tiba' => $data['jam_tiba'],
             ':harga' => $data['harga'],

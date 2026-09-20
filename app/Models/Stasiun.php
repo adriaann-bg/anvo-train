@@ -9,14 +9,14 @@ class Stasiun {
     }
 
     public function getAllStasiun() {
-        // Mengambil semua stasiun dari tabel 'stasiun' diurutkan berdasarkan abjad
         $stmt = $this->db->prepare("SELECT * FROM stasiun ORDER BY nama_stasiun ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getTopDestinasi() {
-        $stmt = $this->db->prepare("SELECT * FROM stasiun WHERE is_top_destination = TRUE LIMIT 6");
+        // Ubah LIMIT 6 menjadi LIMIT 15 agar semua top destinasi muncul di carousel
+        $stmt = $this->db->prepare("SELECT * FROM stasiun WHERE is_top_destination = TRUE LIMIT 15");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

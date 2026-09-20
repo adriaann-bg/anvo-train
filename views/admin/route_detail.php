@@ -158,6 +158,7 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                                 <th class="py-3 px-4">Jenis Kelas</th>
                                 <th class="py-3 px-4">Kapasitas</th>
                                 <th class="py-3 px-4">Status Operasional</th>
+                                <th class="py-3 px-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm divide-y divide-slate-50">
@@ -176,6 +177,11 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                                             <span class="text-[10px] px-2.5 py-1 rounded-full font-bold <?= ($kb['status_operasional'] == 'Aktif') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' ?>">
                                                 <?= $kb['status_operasional'] ?>
                                             </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center">
+                                            <a href="/anvo/public/route/lepas_kereta_koridor/<?= $idKoridor ?>/<?= $kb['id_kereta'] ?>" onclick="return confirm('Kembalikan armada ini ke Pool (lepas dari koridor)?')" class="px-3 py-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                                                Lepas
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -221,8 +227,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Seri / Nama Kereta</label>
                     <select name="id_kereta" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                         <!-- Data diambil dari master kereta -->
-                        <?php foreach($data['semua_kereta'] ?? [] as $sk): ?>
-                            <option value="<?= $sk['id_kereta'] ?>"><?= $sk['nama_kereta'] ?> (<?= $sk['jenis_kelas'] ?>)</option>
+                        <?php foreach($data['kereta_tersedia'] ?? [] as $sk): ?>
+                            <option value="<?= $sk['id_kereta'] ?>"><?= $sk['nama_kereta'] ?> (<?= $sk['kecepatan_maksimal'] ?> km/h)</option>
                         <?php endforeach; ?>
                     </select>
                 </div>

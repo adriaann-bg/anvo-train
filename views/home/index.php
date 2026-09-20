@@ -211,8 +211,8 @@
         <h2 class="text-3xl font-bold text-center text-[#0F172A]">Kota Tujuan</h2>
     </div>
         
-    <!-- Kontainer Scrollable (justify-center untuk desktop, justify-start untuk mobile agar tidak terpotong) -->
-    <div class="flex overflow-x-auto gap-6 px-4 sm:px-6 lg:px-8 pb-10 snap-x snap-mandatory hide-scrollbar justify-start xl:justify-center" style="-ms-overflow-style: none; scrollbar-width: none;">
+    <!-- Kontainer Scrollable (Dihapus xl:justify-center agar tidak terpotong di kiri) -->
+    <div class="flex overflow-x-auto gap-6 px-4 sm:px-6 lg:px-8 pb-10 snap-x snap-mandatory hide-scrollbar justify-start" style="-ms-overflow-style: none; scrollbar-width: none;">
         
         <?php foreach($top_destinasi as $kota): ?>
         <!-- Card Kota (Dinamis) -->

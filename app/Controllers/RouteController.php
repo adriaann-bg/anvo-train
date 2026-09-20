@@ -36,6 +36,10 @@ class RouteController extends Controller {
         // Ambil stasiun yang belum diinput saja
         $data['stasiun_tersedia'] = $routeModel->getStasiunTersedia($id_koridor);
 
+        // --- TAMBAHKAN 2 BARIS INI ---
+        $data['kereta_berdinas'] = $routeModel->getKeretaByKoridor($id_koridor);
+        $data['kereta_tersedia'] = $routeModel->getKeretaTersedia();
+
         $this->view('admin/route_detail', $data);
     }
 
@@ -129,5 +133,33 @@ class RouteController extends Controller {
             header('Location: /anvo/public/route/detail/' . $id_koridor);
             exit;
         }
+    }
+
+    public function tambah_kereta_koridor($id_koridor) {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['id_kereta'])) {
+            $routeModel = $this->model('RouteModel');
+            if (session_status() == PHP_SESSION_NONE) { session_start(); }
+
+            if ($routeModel->tugaskanKereta($id_koridor, $_POST['id_kereta'])) {
+                $_SESSION['success'] = 'Armada berhasil ditugaskan ke koridor!';
+            } else {
+                $_SESSION['error'] = 'Gagal menugaskan armada.';
+            }
+            header('Location: /anvo/public/route/detail/' . $id_koridor);
+            exit;
+        }
+    }
+
+    public function lepas_kereta_koridor($id_koridor, $id_kereta) {
+        $routeModel = $this->model('RouteModel');
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+
+        if ($routeModel->lepasKereta($id_kereta)) {
+            $_SESSION['success'] = 'Armada dikembalikan ke pool (dilepas dari koridor).';
+        } else {
+            $_SESSION['error'] = 'Gagal melepas armada.';
+        }
+        header('Location: /anvo/public/route/detail/' . $id_koridor);
+        exit;
     }
 }

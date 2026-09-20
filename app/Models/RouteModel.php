@@ -75,16 +75,32 @@ class RouteModel {
         return true;
     }
 
-    // Ambil data kereta yang berdinas berdasarkan rute/stasiun di koridor ini
+    // Ambil data kereta yang sedang berdinas KHUSUS di koridor ini (Diurutkan berdasarkan status)
     public function getKeretaByKoridor($id_koridor) {
-        // Kita ambil kereta yang memiliki jadwal yang melewati stasiun dalam koridor ini
-        $sql = "SELECT DISTINCT kereta.* FROM kereta 
-                JOIN jadwal ON kereta.id_kereta = jadwal.id_kereta
-                JOIN koridor_stasiun ks1 ON jadwal.stasiun_asal = ks1.nama_stasiun
-                WHERE ks1.id_koridor = :id_koridor";
+        $sql = "SELECT * FROM kereta WHERE id_koridor = :id_koridor 
+                ORDER BY FIELD(status_operasional, 'Aktif', 'Standby', 'Maintenance', 'Rusak', 'Arsip/Gudang')";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id_koridor' => $id_koridor]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Ambil armada kereta yang belum punya koridor (Nganggur) & statusnya Aktif
+    public function getKeretaTersedia() {
+        $stmt = $this->db->prepare("SELECT * FROM kereta WHERE id_koridor IS NULL AND status_operasional = 'Aktif'");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Tugaskan kereta ke koridor
+    public function tugaskanKereta($id_koridor, $id_kereta) {
+        $stmt = $this->db->prepare("UPDATE kereta SET id_koridor = :id_koridor WHERE id_kereta = :id_kereta");
+        return $stmt->execute([':id_koridor' => $id_koridor, ':id_kereta' => $id_kereta]);
+    }
+
+    // Lepas kereta dari koridor
+    public function lepasKereta($id_kereta) {
+        $stmt = $this->db->prepare("UPDATE kereta SET id_koridor = NULL WHERE id_kereta = :id_kereta");
+        return $stmt->execute([':id_kereta' => $id_kereta]);
     }
 
     // Ubah status aktif/non-aktif koridor
