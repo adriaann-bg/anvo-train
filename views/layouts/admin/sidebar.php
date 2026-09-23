@@ -20,31 +20,35 @@
             <!-- Menu List -->
             <nav class="p-3 space-y-1.5">
                 <a href="/anvo/public/admin" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'dashboard') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-chart-pie w-5 text-center <?= ($data['active_menu'] == 'dashboard') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+                    <i class="fa-solid fa-chart-pie w-5 text-center <?= ($data['active_menu'] == 'dashboard') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Dashboard</span>
                 </a>
                 <a href="/anvo/public/jadwal" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'jadwal') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-calendar-days w-5 text-center <?= ($data['active_menu'] == 'jadwal') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+                    <i class="fa-solid fa-calendar-days w-5 text-center <?= ($data['active_menu'] == 'jadwal') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Kelola Jadwal</span>
                 </a>
                 <a href="/anvo/public/route" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'route') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-route w-5 text-center <?= ($data['active_menu'] == 'route') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+                    <i class="fa-solid fa-route w-5 text-center <?= ($data['active_menu'] == 'route') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Kelola Rute Koridor</span>
                 </a>
                 <a href="/anvo/public/armada" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'armada') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-train w-5 text-center <?= ($data['active_menu'] == 'armada') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+                    <i class="fa-solid fa-train w-5 text-center <?= ($data['active_menu'] == 'armada') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Armada Kereta</span>
                 </a>
                 <a href="#" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'stasiun') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-map-location-dot w-5 text-center <?= ($data['active_menu'] == 'stasiun') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+                    <i class="fa-solid fa-map-location-dot w-5 text-center <?= ($data['active_menu'] == 'stasiun') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Data Stasiun</span>
                 </a>
-                <a href="#" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'users') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-users w-5 text-center <?= ($data['active_menu'] == 'users') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+
+                <!-- Master User -->
+                <a href="/anvo/public/user" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'user') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
+                    <i class="fa-solid fa-users w-5 text-center <?= ($data['active_menu'] == 'user') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Master User</span>
                 </a>
-                <a href="#" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'kru') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
-                    <i class="fa-solid fa-user-tie w-5 text-center <?= ($data['active_menu'] == 'kru') ? 'text-[#8C6239]' : 'text-slate-400' ?> text-base"></i>
+
+                <!-- Master Kru -->
+                <a href="/anvo/public/kru" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'kru') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
+                    <i class="fa-solid fa-user-tie w-5 text-center <?= ($data['active_menu'] == 'kru') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Master Kru</span>
                 </a>
             </nav>

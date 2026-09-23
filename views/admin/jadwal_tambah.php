@@ -63,9 +63,16 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                 <input type="time" name="jam_tiba" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm">
                             </div>
                         </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Keberangkatan</label>
-                            <input type="date" name="tanggal" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm">
+                        <!-- Ganti bagian input tanggal lama dengan ini -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Mulai Operasi</label>
+                                <input type="date" name="tanggal_mulai" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Akhir Operasi</label>
+                                <input type="date" name="tanggal_akhir" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                            </div>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Harga Tiket (Rp)</label>

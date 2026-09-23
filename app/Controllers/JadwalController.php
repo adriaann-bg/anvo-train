@@ -104,4 +104,65 @@ class JadwalController extends Controller {
         echo json_encode($kereta);
         exit;
     }
+
+    // Membuka Halaman Manajemen Kru Berdasarkan Jadwal
+    public function crew($id_jadwal) {
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+        $adminModel = $this->model('AdminModel');
+
+        $filterTanggal = $_GET['tanggal_tugas'] ?? '';
+        $filterKeyword = $_GET['keyword'] ?? '';
+
+        $data['judul'] = 'Penugasan Kru Onboard - ANVO Admin';
+        $data['jadwal'] = $adminModel->getJadwalById($id_jadwal);
+        $data['kru_assigned'] = $adminModel->getKruByJadwalFiltered($id_jadwal, $filterTanggal, $filterKeyword);
+        $data['master_kru'] = $adminModel->getAllMasterKru();
+        $data['filter_tanggal'] = $filterTanggal;
+        $data['filter_keyword'] = $filterKeyword;
+
+        $this->view('admin/jadwal_crew', $data);
+    }
+
+    public function tambah_crew() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $adminModel = $this->model('AdminModel');
+            if (session_status() == PHP_SESSION_NONE) { session_start(); }
+
+            if (!empty($_POST['tanggal_tugas'])) {
+                if ($adminModel->syncPenugasanKru($_POST)) {
+                    $_SESSION['success'] = 'Penugasan kru berhasil diperbarui!';
+                } else {
+                    $_SESSION['error'] = 'Gagal memperbarui penugasan kru.';
+                }
+            } else {
+                $_SESSION['error'] = 'Tentukan tanggal tugas terlebih dahulu.';
+            }
+            header('Location: /anvo/public/jadwal/crew/' . $_POST['id_jadwal']);
+            exit;
+        }
+    }
+
+    // Endpoint AJAX untuk mencentang otomatis kru yang sudah bertugas pada tanggal tersebut
+    public function get_kru_assigned_ajax($id_jadwal) {
+        $tanggal = $_GET['tanggal'] ?? '';
+        $adminModel = $this->model('AdminModel');
+        $assignedIds = $adminModel->getKruAssignedByDate($id_jadwal, $tanggal);
+        
+        header('Content-Type: application/json');
+        echo json_encode($assignedIds);
+        exit;
+    }
+
+    public function hapus_crew($id_penugasan, $id_jadwal) {
+        $adminModel = $this->model('AdminModel');
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+
+        if ($adminModel->hapusPenugasanKru($id_penugasan)) {
+            $_SESSION['success'] = 'Penugasan kru berhasil dihapus.';
+        } else {
+            $_SESSION['error'] = 'Gagal menghapus penugasan kru.';
+        }
+        header('Location: /anvo/public/jadwal/crew/' . $id_jadwal);
+        exit;
+    }
 }

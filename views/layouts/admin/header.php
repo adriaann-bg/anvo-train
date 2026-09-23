@@ -18,3 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 </head>
 <body class="bg-[#F4F6F8] text-[#0F172A] min-h-screen flex overflow-x-hidden">
+    <!-- CONTOH TOMBOL HAMBURGER MOBILE (Letakkan di dalam topbar view/header) -->
+<button onclick="toggleMobileSidebar()" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
+    <i class="fa-solid fa-bars text-lg"></i>
+</button>

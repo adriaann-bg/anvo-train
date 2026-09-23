@@ -116,7 +116,9 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                         </td>
                                         <td class="py-4 px-4">
                                             <span class="font-bold text-slate-800 block"><?= $j['jam_berangkat'] ?> - <?= $j['jam_tiba'] ?> WIB</span>
-                                            <span class="text-xs text-slate-400"><?= date('d M Y', strtotime($j['tanggal'])) ?></span>
+                                            <span class="text-xs text-slate-400">
+                                                <?= date('d M Y', strtotime($j['tanggal_mulai'])) ?> s.d. <?= date('d M Y', strtotime($j['tanggal_akhir'])) ?>
+                                            </span>
                                         </td>
                                         <td class="py-4 px-4 font-bold text-[#8C6239]">
                                             Rp <?= number_format($j['harga'], 0, ',', '.') ?>
@@ -137,9 +139,9 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                                 <button onclick="openModal('modal-edit-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-amber-50 text-[#8C6239] hover:bg-[#8C6239] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Edit">
                                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </button>
-                                                <button onclick="openModal('modal-crew-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-semibold transition-all" title="Penugasan Crew">
+                                                <a href="/anvo/public/jadwal/crew/<?= $j['id_jadwal'] ?>" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-semibold transition-all" title="Penugasan Crew">
                                                     <i class="fa-solid fa-user-shield"></i> Crew
-                                                </button>
+                                                </a>
                                                 <a href="/anvo/public/jadwal/hapus/<?= $j['id_jadwal'] ?>" onclick="return confirm('Hapus jadwal ini?')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
@@ -162,18 +164,33 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             </div>
                                             
                                             <?php 
-                                            // Kalkulasi Array Transit vs Stasiun yang di-skip
+                                            // 1. Ambil data transit dari JSON
                                             $transitData = json_decode($j['stasiun_transit'], true);
                                             if(!is_array($transitData)) {
                                                 $transitData = [$j['stasiun_asal'], $j['stasiun_tujuan']];
                                             }
                                             $fullStasiun = $j['full_stasiun'] ?? [];
                                             
-                                            // Cari perbedaan (Stasiun yang ada di koridor tapi tidak masuk di stasiun transit)
-                                            $skippedStasiun = array_diff($fullStasiun, $transitData);
+                                            // 2. Ambil HANYA stasiun yang berada di antara Asal dan Tujuan (Rute Aktual Segmental)
+                                            $idxAsal = array_search($j['stasiun_asal'], $fullStasiun);
+                                            $idxTujuan = array_search($j['stasiun_tujuan'], $fullStasiun);
+                                            
+                                            $ruteAktual = [];
+                                            if($idxAsal !== false && $idxTujuan !== false) {
+                                                $start = min($idxAsal, $idxTujuan);
+                                                $end = max($idxAsal, $idxTujuan);
+                                                for($i = $start; $i <= $end; $i++) {
+                                                    $ruteAktual[] = $fullStasiun[$i];
+                                                }
+                                            } else {
+                                                $ruteAktual = $fullStasiun; // Fallback jika tidak terdeteksi
+                                            }
+                                            
+                                            // 3. Cari stasiun yang dilewati: Ada di $ruteAktual tapi TIDAK ADA di $transitData
+                                            $skippedStasiun = array_diff($ruteAktual, $transitData);
                                             ?>
 
-                                            <!-- Peta Linier -->
+                                            <!-- Peta Linier (Hanya yang Transit) -->
                                             <div class="space-y-3 relative pt-2">
                                                 <h5 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4">Linier Rute Perjalanan</h5>
                                                 <div class="p-6 bg-slate-50/80 rounded-3xl border border-slate-200/60 space-y-4 relative pl-8 before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-[#8C6239]">
@@ -196,7 +213,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                                 </div>
                                             </div>
 
-                                            <!-- Kotak Khusus Stasiun yang Di-skip -->
+                                            <!-- Kotak Khusus Stasiun yang Di-skip (Dilewati Langsung) -->
                                             <?php if(!empty($skippedStasiun)): ?>
                                             <div class="mt-6 p-4 bg-slate-50 border border-slate-200 border-dashed rounded-2xl">
                                                 <span class="text-[10px] font-bold text-slate-400 block mb-2 uppercase tracking-wider"><i class="fa-solid fa-forward-step mr-1.5"></i> Langsung / Tidak Transit Di Stasiun:</span>
@@ -214,21 +231,60 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                     </div>
                                     <!-- End Modal MAP -->
 
-                                    <!-- ... MODAL DETAIL, EDIT, CREW BAWAAN LAMA TETAP BERADA DI SINI ... -->
+                                    <!-- MODAL DETAIL JADWAL (REVISI RATA KANAN & INFO LENGKAP) -->
                                     <div id="modal-detail-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-                                        <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl space-y-4 animate-fade-in">
+                                        <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl space-y-5 animate-fade-in">
                                             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                                                 <h3 class="font-bold text-base text-[#0F172A]"><i class="fa-solid fa-circle-info text-[#2B9BFB] mr-2"></i> Detail Jadwal #<?= $j['id_jadwal'] ?></h3>
                                                 <button onclick="closeModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
                                             </div>
+                                            
+                                            <?php 
+                                            $transitData = json_decode($j['stasiun_transit'], true) ?? [$j['stasiun_asal'], $j['stasiun_tujuan']];
+                                            $totalTransit = count($transitData) > 2 ? count($transitData) - 2 : 0;
+                                            
+                                            $fullStasiun = $j['full_stasiun'] ?? [];
+                                            $idxAsal = array_search($j['stasiun_asal'], $fullStasiun);
+                                            $idxTujuan = array_search($j['stasiun_tujuan'], $fullStasiun);
+                                            $ruteAktual = ($idxAsal !== false && $idxTujuan !== false) ? array_slice($fullStasiun, min($idxAsal, $idxTujuan), abs($idxAsal - $idxTujuan) + 1) : $fullStasiun;
+                                            $totalDilewati = count(array_diff($ruteAktual, $transitData));
+                                            ?>
+
                                             <div class="space-y-2.5 text-sm text-slate-600">
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Jenis:</span> <strong class="text-[#0F172A]"><?= $j['jenis_jadwal'] ?></strong></div>
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Kereta:</span> <strong class="text-[#0F172A]"><?= $j['nama_kereta'] ?> (<?= $j['jenis_kelas'] ?>)</strong></div>
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Waktu:</span> <strong class="text-[#0F172A]"><?= $j['jam_berangkat'] ?> - <?= $j['jam_tiba'] ?> WIB</strong></div>
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Tanggal:</span> <strong class="text-[#0F172A]"><?= date('d M Y', strtotime($j['tanggal'])) ?></strong></div>
-                                                <div class="flex justify-between bg-slate-50 p-2.5 rounded-xl"><span>Tarif:</span> <strong class="text-[#8C6239]">Rp <?= number_format($j['harga'], 0, ',', '.') ?></strong></div>
+                                                <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                                                    <span class="font-medium text-slate-500">Jenis Jadwal:</span> 
+                                                    <strong class="text-[#0F172A] text-right"><?= $j['jenis_jadwal'] ?></strong>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                                                    <span class="font-medium text-slate-500">Armada Kereta:</span> 
+                                                    <strong class="text-[#0F172A] text-right"><?= $j['nama_kereta'] ?> <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-1.5 py-0.5 rounded ml-1"><?= $j['jenis_kelas'] ?></span></strong>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                                                    <span class="font-medium text-slate-500">Waktu Operasional:</span> 
+                                                    <strong class="text-[#0F172A] text-right"><?= $j['jam_berangkat'] ?> - <?= $j['jam_tiba'] ?> WIB</strong>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-xl">
+                                                    <span class="font-medium text-slate-500">Rentang Tanggal:</span> 
+                                                    <strong class="text-[#0F172A] text-right"><?= date('d M Y', strtotime($j['tanggal_mulai'])) ?> s.d. <?= date('d M Y', strtotime($j['tanggal_akhir'])) ?></strong>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-amber-50/50 border border-amber-200/60 px-3.5 py-2.5 rounded-xl">
+                                                    <span class="font-bold text-[#8C6239]">Tarif Tiket:</span> 
+                                                    <strong class="text-[#8C6239] text-right">Rp <?= number_format($j['harga'], 0, ',', '.') ?></strong>
+                                                </div>
                                             </div>
-                                            <button onclick="closeModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="w-full bg-[#0F172A] text-white py-2.5 rounded-xl font-semibold text-xs">Tutup</button>
+
+                                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                                <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl text-center">
+                                                    <span class="block text-[10px] uppercase font-bold text-emerald-600">Total Transit</span>
+                                                    <span class="text-base font-extrabold text-[#0F172A]"><?= $totalTransit ?> Stasiun</span>
+                                                </div>
+                                                <div class="bg-rose-50 border border-rose-100 p-3 rounded-xl text-center">
+                                                    <span class="block text-[10px] uppercase font-bold text-rose-500">Dilewati (Skip)</span>
+                                                    <span class="text-base font-extrabold text-[#0F172A]"><?= $totalDilewati ?> Stasiun</span>
+                                                </div>
+                                            </div>
+
+                                            <button onclick="closeModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="w-full bg-[#0F172A] hover:bg-slate-800 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md">Tutup Detail</button>
                                         </div>
                                     </div>
                                     <div id="modal-edit-<?= $j['id_jadwal'] ?>" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
