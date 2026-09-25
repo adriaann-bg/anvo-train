@@ -11,16 +11,15 @@ class JadwalController extends Controller {
         
         $tanggal = $_GET['tanggal'] ?? '';
         $kelas = $_GET['kelas'] ?? '';
-        $rute = $_GET['rute'] ?? '';
+        $asal = $_GET['asal'] ?? '';
+        $tujuan = $_GET['tujuan'] ?? '';
 
-        // 1. Ambil jadwal dari database
-        $jadwal = $adminModel->getFilteredJadwal($tanggal, $kelas, $rute);
+        // Panggil model dengan parameter baru
+        $jadwal = $adminModel->getFilteredJadwal($tanggal, $kelas, $asal, $tujuan);
         
-        // 2. TAMBAHAN: Ambil data stasiun full per koridor untuk mencari stasiun yang di-skip
         foreach ($jadwal as &$j) {
             if (!empty($j['id_koridor'])) {
                 $koridor_stasiun = $routeModel->getStasiunByKoridor($j['id_koridor']);
-                // Ekstrak hanya nama stasiunnya menjadi array flat
                 $j['full_stasiun'] = array_column($koridor_stasiun, 'nama_stasiun');
             } else {
                 $j['full_stasiun'] = [];
@@ -28,12 +27,17 @@ class JadwalController extends Controller {
         }
 
         $data['judul'] = 'Kelola Jadwal - ANVO Admin';
-        $data['jadwal'] = $jadwal; // Masukkan jadwal yang sudah di-inject full_stasiun
+        $data['jadwal'] = $jadwal; 
         $data['kereta'] = $adminModel->getKeretaAktif();
         $data['stasiun'] = $adminModel->getAllStasiun();
         $data['koridor_list'] = $routeModel->getAllKoridor(); 
         
-        $data['filter'] = ['tanggal' => $tanggal, 'kelas' => $kelas, 'rute' => $rute];
+        $data['filter'] = [
+            'tanggal' => $tanggal, 
+            'kelas' => $kelas, 
+            'asal' => $asal, 
+            'tujuan' => $tujuan
+        ];
 
         $this->view('admin/jadwal', $data);
     }

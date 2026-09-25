@@ -89,6 +89,10 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                 <h2 class="text-xl font-extrabold text-[#0F172A]">Konfigurasi Stasiun Transit</h2>
                                 <p class="text-xs text-slate-400 mt-1">Klik titik stasiun untuk menonaktifkan pemberhentian (kereta akan lewat langsung).</p>
                             </div>
+                            <!-- TOMBOL PUTAR ARAH RUTE -->
+                            <button type="button" id="btn-reverse-route" class="hidden px-4 py-2.5 bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm items-center gap-2" title="Tukar Keberangkatan dan Tujuan">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i> Putar Arah (Z - A)
+                            </button>
                         </div>
 
                         <!-- Area Peta Interaktif -->
@@ -136,22 +140,86 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     </div>
 
     <script>
+        let currentStations = []; // Variabel global untuk menyimpan data stasiun
+
+        // Fungsi khusus untuk menggambar ulang peta
+        function renderTransitMap(data) {
+            const transitLine = document.getElementById('transit-line');
+            transitLine.innerHTML = '';
+            if(data.length < 2) return;
+
+            // Set Stasiun Awal & Akhir Otomatis
+            document.getElementById('label-asal').innerText = data[0].nama_stasiun;
+            document.getElementById('input-asal').value = data[0].nama_stasiun;
+            document.getElementById('label-tujuan').innerText = data[data.length-1].nama_stasiun;
+            document.getElementById('input-tujuan').value = data[data.length-1].nama_stasiun;
+
+            // Render UI Peta Interaktif
+            data.forEach((st, index) => {
+                const isFirstOrLast = (index === 0 || index === data.length - 1);
+                
+                const node = document.createElement('div');
+                node.className = 'flex items-center';
+                node.innerHTML = `
+                    <label class="relative flex flex-col items-center cursor-pointer group ${isFirstOrLast ? 'pointer-events-none' : ''}">
+                        <input type="checkbox" name="stasiun_transit[]" value="${st.nama_stasiun}" checked class="peer hidden">
+                        <div class="w-6 h-6 rounded-full border-[5px] bg-white transition-all duration-300 z-10 ${isFirstOrLast ? 'border-emerald-500' : 'border-slate-300 peer-checked:border-[#2B9BFB] group-hover:scale-110'}"></div>
+                        <div class="absolute top-8 w-max text-center">
+                            <span class="text-xs transition-colors duration-300 ${isFirstOrLast ? 'font-bold text-emerald-600' : 'text-slate-400 peer-checked:text-[#0F172A] peer-checked:font-bold'}">
+                                ${st.nama_stasiun.split(' - ')[0]}
+                            </span>
+                            ${!isFirstOrLast ? '<span class="text-[9px] block text-slate-400 peer-checked:text-[#2B9BFB] mt-0.5 peer-checked:opacity-100 opacity-0 transition-opacity">Berhenti</span>' : ''}
+                        </div>
+                    </label>
+                    ${index < data.length - 1 ? '<div class="w-16 sm:w-24 h-1.5 bg-slate-200 transition-colors"></div>' : ''}
+                `;
+
+                // Efek garis warna biru
+                if(!isFirstOrLast) {
+                    const checkbox = node.querySelector('input');
+                    const lineBefore = node.previousElementSibling ? node.previousElementSibling.querySelector('.h-1\\.5') : null;
+                    const lineAfter = node.querySelector('.h-1\\.5');
+                    
+                    if(lineBefore) lineBefore.classList.add('bg-[#2B9BFB]/30');
+                    if(lineAfter) lineAfter.classList.add('bg-[#2B9BFB]/30');
+
+                    checkbox.addEventListener('change', function() {
+                        if(this.checked) {
+                            node.querySelector('.w-6').classList.replace('border-slate-300', 'border-[#2B9BFB]');
+                        } else {
+                            node.querySelector('.w-6').classList.replace('border-[#2B9BFB]', 'border-slate-300');
+                        }
+                    });
+                }
+                transitLine.appendChild(node);
+            });
+
+            // Tampilkan UI
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('transit-map-container').classList.remove('hidden');
+            
+            // Tampilkan tombol pembalik arah (ubah display dari hidden ke inline-flex)
+            document.getElementById('btn-reverse-route').classList.remove('hidden');
+            document.getElementById('btn-reverse-route').classList.add('inline-flex');
+        }
+
+        // Listener saat koridor dipilih
         document.getElementById('select-koridor').addEventListener('change', function() {
             const idKoridor = this.value;
             const selectArmada = document.getElementById('select-armada');
-            const transitContainer = document.getElementById('transit-map-container');
-            const emptyState = document.getElementById('empty-state');
-            const transitLine = document.getElementById('transit-line');
 
             if (!idKoridor) {
                 selectArmada.innerHTML = '<option value="">-- Menunggu Koridor --</option>';
                 selectArmada.disabled = true;
-                transitContainer.classList.add('hidden');
-                emptyState.classList.remove('hidden');
+                document.getElementById('transit-map-container').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('btn-reverse-route').classList.add('hidden');
+                document.getElementById('btn-reverse-route').classList.remove('inline-flex');
+                currentStations = [];
                 return;
             }
 
-            // 1. Fetch Armada (Logika Validasi Status)
+            // 1. Fetch Armada
             selectArmada.innerHTML = '<option value="">Memuat armada...</option>';
             fetch('/anvo/public/jadwal/get_kereta_ajax/' + idKoridor)
                 .then(r => r.json())
@@ -168,71 +236,28 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     selectArmada.disabled = false;
                 });
 
-            // 2. Fetch Stasiun & Render Interactive Map
+            // 2. Fetch Stasiun & Simpan ke Variabel Global
             fetch('/anvo/public/jadwal/get_stasiun_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
-                    transitLine.innerHTML = '';
-                    if(data.length < 2) return;
-
-                    // Set Stasiun Awal & Akhir Otomatis
-                    document.getElementById('label-asal').innerText = data[0].nama_stasiun;
-                    document.getElementById('input-asal').value = data[0].nama_stasiun;
-                    document.getElementById('label-tujuan').innerText = data[data.length-1].nama_stasiun;
-                    document.getElementById('input-tujuan').value = data[data.length-1].nama_stasiun;
-
-                    // Render UI Peta Interaktif
-                    data.forEach((st, index) => {
-                        const isFirstOrLast = (index === 0 || index === data.length - 1);
-                        
-                        const node = document.createElement('div');
-                        node.className = 'flex items-center';
-                        node.innerHTML = `
-                            <label class="relative flex flex-col items-center cursor-pointer group ${isFirstOrLast ? 'pointer-events-none' : ''}">
-                                <input type="checkbox" name="stasiun_transit[]" value="${st.nama_stasiun}" checked class="peer hidden">
-                                
-                                <!-- Lingkaran Node -->
-                                <div class="w-6 h-6 rounded-full border-[5px] bg-white transition-all duration-300 z-10
-                                    ${isFirstOrLast ? 'border-emerald-500' : 'border-slate-300 peer-checked:border-[#2B9BFB] group-hover:scale-110'}">
-                                </div>
-                                
-                                <!-- Tooltip / Label Nama Stasiun -->
-                                <div class="absolute top-8 w-max text-center">
-                                    <span class="text-xs transition-colors duration-300 
-                                        ${isFirstOrLast ? 'font-bold text-emerald-600' : 'text-slate-400 peer-checked:text-[#0F172A] peer-checked:font-bold'}">
-                                        ${st.nama_stasiun.split(' - ')[0]}
-                                    </span>
-                                    ${!isFirstOrLast ? '<span class="text-[9px] block text-slate-400 peer-checked:text-[#2B9BFB] mt-0.5 peer-checked:opacity-100 opacity-0 transition-opacity">Berhenti</span>' : ''}
-                                </div>
-                            </label>
-                            ${index < data.length - 1 ? '<div class="w-16 sm:w-24 h-1.5 bg-slate-200 transition-colors"></div>' : ''}
-                        `;
-
-                        // Efek mengubah warna garis jika node di-klik
-                        if(!isFirstOrLast) {
-                            const checkbox = node.querySelector('input');
-                            const lineBefore = node.previousElementSibling ? node.previousElementSibling.querySelector('.h-1\\.5') : null;
-                            const lineAfter = node.querySelector('.h-1\\.5');
-                            
-                            // Set warna default garis biru
-                            if(lineBefore) lineBefore.classList.add('bg-[#2B9BFB]/30');
-                            if(lineAfter) lineAfter.classList.add('bg-[#2B9BFB]/30');
-
-                            checkbox.addEventListener('change', function() {
-                                if(this.checked) {
-                                    node.querySelector('.w-6').classList.replace('border-slate-300', 'border-[#2B9BFB]');
-                                } else {
-                                    node.querySelector('.w-6').classList.replace('border-[#2B9BFB]', 'border-slate-300');
-                                }
-                            });
-                        }
-                        
-                        transitLine.appendChild(node);
-                    });
-
-                    emptyState.classList.add('hidden');
-                    transitContainer.classList.remove('hidden');
+                    currentStations = data; 
+                    renderTransitMap(currentStations); // Panggil fungsi render utama
                 });
+        });
+
+        // Aksi Ketika Tombol Putar Arah Diklik
+        document.getElementById('btn-reverse-route').addEventListener('click', function() {
+            if (currentStations.length > 0) {
+                // Balikkan urutan array stasiun
+                currentStations.reverse(); 
+                // Gambar ulang petanya berdasarkan array yang sudah dibalik
+                renderTransitMap(currentStations); 
+                
+                // Ubah teks ikon untuk feedback visual
+                const icon = this.querySelector('i');
+                icon.classList.add('fa-spin');
+                setTimeout(() => icon.classList.remove('fa-spin'), 300);
+            }
         });
 
         // Validasi Pencegahan Simpan Jika Kereta Tidak Aktif

@@ -36,7 +36,7 @@ class AdminModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    public function getFilteredJadwal($tanggal = '', $kelas = '', $rute = '', $keyword = '') {
+    public function getFilteredJadwal($tanggal = '', $kelas = '', $asal = '', $tujuan = '') {
         $sql = "SELECT DISTINCT jadwal.*, kereta.nama_kereta, kereta.jenis_kelas 
                 FROM jadwal 
                 JOIN kereta ON jadwal.id_kereta = kereta.id_kereta 
@@ -46,21 +46,41 @@ class AdminModel {
         
         $params = [];
 
+        // Filter Tanggal
         if (!empty($tanggal)) {
             $sql .= " AND :tanggal BETWEEN jadwal.tanggal_mulai AND jadwal.tanggal_akhir";
             $params[':tanggal'] = $tanggal;
         }
+
+        // Filter Kelas Kereta
         if (!empty($kelas)) {
-            $sql .= " AND kereta.jenis_kelas = :kelas";
-            $params[':kelas'] = $kelas;
+            $sql .= " AND kereta.jenis_kelas LIKE :kelas";
+            $params[':kelas'] = '%' . $kelas . '%';
         }
-        if (!empty($rute)) {
-            $sql .= " AND (jadwal.stasiun_asal LIKE :rute OR jadwal.stasiun_tujuan LIKE :rute OR jadwal.stasiun_transit LIKE :rute)";
-            $params[':rute'] = '%' . $rute . '%';
-        }
-        if (!empty($keyword)) {
-            $sql .= " AND (kereta.nama_kereta LIKE :keyword OR jadwal.stasiun_transit LIKE :keyword OR mk.nama_lengkap LIKE :keyword)";
-            $params[':keyword'] = '%' . $keyword . '%';
+
+        // Filter Rute 2 Arah (Asal & Tujuan)
+        if (!empty($asal) && !empty($tujuan)) {
+            $sql .= " AND (
+                        (jadwal.stasiun_asal LIKE :asal AND jadwal.stasiun_tujuan LIKE :tujuan) 
+                        OR 
+                        (jadwal.stasiun_asal LIKE :tujuan_rev AND jadwal.stasiun_tujuan LIKE :asal_rev)
+                      )";
+            $params[':asal'] = '%' . $asal . '%';
+            $params[':tujuan'] = '%' . $tujuan . '%';
+            $params[':tujuan_rev'] = '%' . $tujuan . '%';
+            $params[':asal_rev'] = '%' . $asal . '%';
+        } elseif (!empty($asal)) {
+            // PERBAIKAN: Gunakan parameter unik (:asal1, :asal2, :asal3)
+            $sql .= " AND (jadwal.stasiun_asal LIKE :asal1 OR jadwal.stasiun_tujuan LIKE :asal2 OR jadwal.stasiun_transit LIKE :asal3)";
+            $params[':asal1'] = '%' . $asal . '%';
+            $params[':asal2'] = '%' . $asal . '%';
+            $params[':asal3'] = '%' . $asal . '%';
+        } elseif (!empty($tujuan)) {
+            // PERBAIKAN: Gunakan parameter unik (:tujuan1, :tujuan2, :tujuan3)
+            $sql .= " AND (jadwal.stasiun_asal LIKE :tujuan1 OR jadwal.stasiun_tujuan LIKE :tujuan2 OR jadwal.stasiun_transit LIKE :tujuan3)";
+            $params[':tujuan1'] = '%' . $tujuan . '%';
+            $params[':tujuan2'] = '%' . $tujuan . '%';
+            $params[':tujuan3'] = '%' . $tujuan . '%';
         }
 
         $sql .= " ORDER BY jadwal.tanggal_mulai DESC, jadwal.jam_berangkat ASC";
@@ -119,7 +139,7 @@ class AdminModel {
     public function getKruByJadwalFiltered($id_jadwal, $tanggal = '', $keyword = '') {
         $sql = "SELECT jp.*, mk.* 
                 FROM jadwal_penugasan_kru jp 
-                JOIN master_kru mk ON jp.id_kru = mk.id_kru 
+                JOIN master_kru mk ON jp.id_kru = mk.id_kru     
                 WHERE jp.id_jadwal = :id_jadwal";
         
         $params = [':id_jadwal' => $id_jadwal];
@@ -253,14 +273,85 @@ class AdminModel {
 
     
 
-    public function getAllUsers() {
-        $stmt = $this->db->prepare("SELECT * FROM users ORDER BY id_user DESC");
-        $stmt->execute();
+    public function getAllUsers($nama = '', $nik = '', $kontak = '', $tanggal_lahir = '') {
+        $sql = "SELECT * FROM users WHERE 1=1";
+        $params = [];
+
+        if (!empty($nama)) {
+            $sql .= " AND nama LIKE :nama";
+            $params[':nama'] = '%' . $nama . '%';
+        }
+        if (!empty($nik)) {
+            $sql .= " AND nik LIKE :nik";
+            $params[':nik'] = '%' . $nik . '%';
+        }
+        if (!empty($kontak)) {
+            $sql .= " AND (email LIKE :kontak OR no_hp LIKE :kontak)";
+            $params[':kontak'] = '%' . $kontak . '%';
+        }
+        if (!empty($tanggal_lahir)) {
+            $sql .= " AND tanggal_lahir = :tanggal_lahir";
+            $params[':tanggal_lahir'] = $tanggal_lahir;
+        }
+
+        $sql .= " ORDER BY id_user DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function hapusUser($id_user) {
         $stmt = $this->db->prepare("DELETE FROM users WHERE id_user = :id");
         return $stmt->execute([':id' => $id_user]);
+    }
+
+    // Ambil user berdasarkan ID
+    public function getUserById($id_user) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id_user = :id LIMIT 1");
+        $stmt->execute([':id' => $id_user]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Tambah user baru oleh admin
+    public function tambahUser($data) {
+        $sql = "INSERT INTO users (nama, nik, tanggal_lahir, email, no_hp, password, created_at) 
+                VALUES (:nama, :nik, :tanggal_lahir, :email, :no_hp, :password, NOW())";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':nama' => $data['nama'],
+            ':nik' => $data['nik'],
+            ':tanggal_lahir' => $data['tanggal_lahir'],
+            ':email' => $data['email'],
+            ':no_hp' => $data['no_hp'],
+            ':password' => password_hash($data['password'], PASSWORD_DEFAULT)
+        ]);
+    }
+
+    // Update user oleh admin
+    public function updateUser($id_user, $data) {
+        if (!empty($data['password'])) {
+            $sql = "UPDATE users SET nama = :nama, nik = :nik, tanggal_lahir = :tanggal_lahir, email = :email, no_hp = :no_hp, password = :password WHERE id_user = :id";
+            $params = [
+                ':nama' => $data['nama'],
+                ':nik' => $data['nik'],
+                ':tanggal_lahir' => $data['tanggal_lahir'],
+                ':email' => $data['email'],
+                ':no_hp' => $data['no_hp'],
+                ':password' => password_hash($data['password'], PASSWORD_DEFAULT),
+                ':id' => $id_user
+            ];
+        } else {
+            $sql = "UPDATE users SET nama = :nama, nik = :nik, tanggal_lahir = :tanggal_lahir, email = :email, no_hp = :no_hp WHERE id_user = :id";
+            $params = [
+                ':nama' => $data['nama'],
+                ':nik' => $data['nik'],
+                ':tanggal_lahir' => $data['tanggal_lahir'],
+                ':email' => $data['email'],
+                ':no_hp' => $data['no_hp'],
+                ':id' => $id_user
+            ];
+        }
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
 }
