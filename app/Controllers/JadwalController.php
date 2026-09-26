@@ -47,11 +47,14 @@ class JadwalController extends Controller {
             $adminModel = $this->model('AdminModel');
             if (session_status() == PHP_SESSION_NONE) { session_start(); }
             
-            // Tangkap array stasiun_transit dari checkbox (peta interaktif)
-            $transitArr = isset($_POST['stasiun_transit']) ? $_POST['stasiun_transit'] : [];
-            
-            // Masukkan data transit (dalam bentuk JSON) ke dalam array POST utama
-            $_POST['stasiun_transit'] = json_encode($transitArr);
+            // Cek apakah stasiun_transit sudah berupa JSON string dari JS atau array biasa
+            if (isset($_POST['stasiun_transit']) && is_string($_POST['stasiun_transit'])) {
+                $transitVal = $_POST['stasiun_transit'];
+            } else {
+                $transitArr = isset($_POST['stasiun_transit']) ? $_POST['stasiun_transit'] : [];
+                $transitVal = json_encode($transitArr);
+            }
+            $_POST['stasiun_transit'] = $transitVal;
             
             if ($adminModel->tambahJadwal($_POST)) {
                 $_SESSION['success'] = 'Jadwal operasional baru berhasil dibuat!';
@@ -75,6 +78,45 @@ class JadwalController extends Controller {
         
         header('Location: /anvo/public/jadwal');
         exit;
+    }
+
+    // Membuka halaman khusus Edit Jadwal
+    public function edit_page($id_jadwal) {
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+        $adminModel = $this->model('AdminModel');
+        $routeModel = $this->model('RouteModel');
+        
+        $data['judul'] = 'Edit Jadwal Operasional - ANVO Admin';
+        $data['jadwal_edit'] = $adminModel->getJadwalById($id_jadwal);
+        $data['koridor_list'] = $routeModel->getAllKoridor();
+        $data['stasiun'] = $adminModel->getAllStasiun();
+        
+        // Memanggil file view jadwal_edit.php (Pastikan Anda membuat file ini nanti)
+        $this->view('admin/jadwal_edit', $data);
+    }
+
+    // Proses Simpan Pembaruan Jadwal
+    public function update() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $adminModel = $this->model('AdminModel');
+            if (session_status() == PHP_SESSION_NONE) { session_start(); }
+            
+            if (isset($_POST['stasiun_transit']) && is_string($_POST['stasiun_transit'])) {
+                $transitVal = $_POST['stasiun_transit'];
+            } else {
+                $transitArr = isset($_POST['stasiun_transit']) ? $_POST['stasiun_transit'] : [];
+                $transitVal = json_encode($transitArr);
+            }
+            $_POST['stasiun_transit'] = $transitVal;
+            
+            if ($adminModel->updateJadwal($_POST)) {
+                $_SESSION['success'] = 'Jadwal operasional berhasil diperbarui!';
+            } else {
+                $_SESSION['error'] = 'Gagal memperbarui jadwal operasional.';
+            }
+            header('Location: /anvo/public/jadwal');
+            exit;
+        }
     }
 
     // Membuka halaman khusus Tambah Jadwal

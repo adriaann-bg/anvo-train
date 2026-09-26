@@ -8,10 +8,12 @@ class AdminController extends Controller {
         if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
         $adminModel = $this->model('AdminModel');
-        $data['judul'] = 'Panel Admin - Kelola Jadwal ANVO';
+        $data['judul'] = 'Pusat Kendali Operasional - ANVO Admin';
         $data['jadwal'] = $adminModel->getAllJadwal();
         $data['kereta'] = $adminModel->getAllKereta();
         $data['stasiun'] = $adminModel->getAllStasiun();
+        $data['total_penumpang'] = $adminModel->getTotalPenumpangCount();
+        $data['total_kru_aktif'] = $adminModel->getTotalKruAktif();
 
         $this->view('admin/index', $data);
     }

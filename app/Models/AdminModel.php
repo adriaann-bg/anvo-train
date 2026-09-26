@@ -46,48 +46,81 @@ class AdminModel {
         
         $params = [];
 
-        // Filter Tanggal
         if (!empty($tanggal)) {
             $sql .= " AND :tanggal BETWEEN jadwal.tanggal_mulai AND jadwal.tanggal_akhir";
             $params[':tanggal'] = $tanggal;
         }
 
-        // Filter Kelas Kereta
         if (!empty($kelas)) {
             $sql .= " AND kereta.jenis_kelas LIKE :kelas";
             $params[':kelas'] = '%' . $kelas . '%';
-        }
-
-        // Filter Rute 2 Arah (Asal & Tujuan)
-        if (!empty($asal) && !empty($tujuan)) {
-            $sql .= " AND (
-                        (jadwal.stasiun_asal LIKE :asal AND jadwal.stasiun_tujuan LIKE :tujuan) 
-                        OR 
-                        (jadwal.stasiun_asal LIKE :tujuan_rev AND jadwal.stasiun_tujuan LIKE :asal_rev)
-                      )";
-            $params[':asal'] = '%' . $asal . '%';
-            $params[':tujuan'] = '%' . $tujuan . '%';
-            $params[':tujuan_rev'] = '%' . $tujuan . '%';
-            $params[':asal_rev'] = '%' . $asal . '%';
-        } elseif (!empty($asal)) {
-            // PERBAIKAN: Gunakan parameter unik (:asal1, :asal2, :asal3)
-            $sql .= " AND (jadwal.stasiun_asal LIKE :asal1 OR jadwal.stasiun_tujuan LIKE :asal2 OR jadwal.stasiun_transit LIKE :asal3)";
-            $params[':asal1'] = '%' . $asal . '%';
-            $params[':asal2'] = '%' . $asal . '%';
-            $params[':asal3'] = '%' . $asal . '%';
-        } elseif (!empty($tujuan)) {
-            // PERBAIKAN: Gunakan parameter unik (:tujuan1, :tujuan2, :tujuan3)
-            $sql .= " AND (jadwal.stasiun_asal LIKE :tujuan1 OR jadwal.stasiun_tujuan LIKE :tujuan2 OR jadwal.stasiun_transit LIKE :tujuan3)";
-            $params[':tujuan1'] = '%' . $tujuan . '%';
-            $params[':tujuan2'] = '%' . $tujuan . '%';
-            $params[':tujuan3'] = '%' . $tujuan . '%';
         }
 
         $sql .= " ORDER BY jadwal.tanggal_mulai DESC, jadwal.jam_berangkat ASC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rawJadwal = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $filtered = [];
+        foreach ($rawJadwal as $j) {
+            // Normalisasi JSON yang mungkin double-encoded atau format lama
+            $transit = json_decode($j['stasiun_transit'], true);
+            if (is_string($transit)) {
+                $transit = json_decode($transit, true); 
+            }
+            
+            $transitNamas = [];
+            if (is_array($transit)) {
+                foreach ($transit as $t) {
+                    $transitNamas[] = is_array($t) ? ($t['nama'] ?? '') : $t;
+                }
+            } else {
+                $transitNamas = [$j['stasiun_asal'], $j['stasiun_tujuan']];
+            }
+
+            $match = true;
+
+            // 1. Cek Stasiun Asal
+            if (!empty($asal)) {
+                $foundAsal = false;
+                $asalIdx = -1;
+                foreach ($transitNamas as $idx => $st) {
+                    if (stripos($st, $asal) !== false) {
+                        $foundAsal = true;
+                        $asalIdx = $idx;
+                        break;
+                    }
+                }
+                if (!$foundAsal) { $match = false; }
+            }
+
+            // 2. Cek Stasiun Tujuan & Arah
+            if (!empty($tujuan) && $match) {
+                $foundTujuan = false;
+                $tujuanIdx = -1;
+                foreach ($transitNamas as $idx => $st) {
+                    if (stripos($st, $tujuan) !== false) {
+                        $foundTujuan = true;
+                        $tujuanIdx = $idx;
+                        break;
+                    }
+                }
+                if (!$foundTujuan) {
+                    $match = false;
+                } else {
+                    if (!empty($asal) && $asalIdx >= $tujuanIdx) {
+                        $match = false;
+                    }
+                }
+            }
+
+            if ($match) {
+                $filtered[] = $j;
+            }
+        }
+
+        return $filtered;
     }
 
     public function tambahJadwal($data) {
@@ -167,14 +200,12 @@ class AdminModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Ambil data kru berdasarkan ID
     public function getKruById($id_kru) {
         $stmt = $this->db->prepare("SELECT * FROM master_kru WHERE id_kru = :id");
         $stmt->execute([':id' => $id_kru]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Update data kru
     public function updateKru($id_kru, $data, $foto = null) {
         if ($foto) {
             $sql = "UPDATE master_kru SET nip = :nip, nik = :nik, nama_lengkap = :nama_lengkap, tanggal_lahir = :tanggal_lahir, agama = :agama, foto = :foto, email = :email, no_telepon = :no_telepon, pendidikan_terakhir = :pendidikan_terakhir, alamat_lengkap = :alamat_lengkap, status_pernikahan = :status_pernikahan, kontak_darurat = :kontak_darurat, riwayat_penyakit = :riwayat_penyakit, posisi = :posisi WHERE id_kru = :id";
@@ -199,15 +230,12 @@ class AdminModel {
             ':id' => $id_kru
         ];
 
-        if ($foto) {
-            $params[':foto'] = $foto;
-        }
+        if ($foto) { $params[':foto'] = $foto; }
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
 
-    // Update fungsi tambahKru agar support agama & foto
     public function tambahKru($data, $foto = 'default-kru.png') {
         $sql = "INSERT INTO master_kru (nip, nik, nama_lengkap, tanggal_lahir, agama, foto, email, no_telepon, pendidikan_terakhir, alamat_lengkap, status_pernikahan, kontak_darurat, riwayat_penyakit, posisi, status_kru) 
                 VALUES (:nip, :nik, :nama_lengkap, :tanggal_lahir, :agama, :foto, :email, :no_telepon, :pendidikan_terakhir, :alamat_lengkap, :status_pernikahan, :kontak_darurat, :riwayat_penyakit, :posisi, 'Aktif')";
@@ -235,17 +263,14 @@ class AdminModel {
         return $stmt->execute([':id' => $id_kru]);
     }
 
-    // Sinkronisasi penugasan kru (Check = tambah, Uncheck = hapus otomatis, cegah duplikasi)
     public function syncPenugasanKru($data) {
         $id_jadwal = $data['id_jadwal'];
         $tanggal_tugas = $data['tanggal_tugas'];
         $selectedKru = isset($data['id_kru']) ? $data['id_kru'] : [];
 
-        // 1. Hapus penugasan lama pada tanggal tersebut untuk jadwal ini
         $stmtDel = $this->db->prepare("DELETE FROM jadwal_penugasan_kru WHERE id_jadwal = :id_jadwal AND tanggal_tugas = :tanggal_tugas");
         $stmtDel->execute([':id_jadwal' => $id_jadwal, ':tanggal_tugas' => $tanggal_tugas]);
 
-        // 2. Masukkan ulang kru yang dicentang
         if (!empty($selectedKru)) {
             $stmtIns = $this->db->prepare("INSERT INTO jadwal_penugasan_kru (id_jadwal, id_kru, tanggal_tugas) VALUES (:id_jadwal, :id_kru, :tanggal_tugas)");
             foreach ($selectedKru as $kruId) {
@@ -259,7 +284,6 @@ class AdminModel {
         return true;
     }
 
-    // Ambil ID kru yang sudah bertugas pada tanggal tertentu
     public function getKruAssignedByDate($id_jadwal, $tanggal_tugas) {
         $stmt = $this->db->prepare("SELECT id_kru FROM jadwal_penugasan_kru WHERE id_jadwal = :id_jadwal AND tanggal_tugas = :tanggal");
         $stmt->execute([':id_jadwal' => $id_jadwal, ':tanggal' => $tanggal_tugas]);
@@ -270,8 +294,6 @@ class AdminModel {
         $stmt = $this->db->prepare("DELETE FROM jadwal_penugasan_kru WHERE id_penugasan = :id");
         return $stmt->execute([':id' => $id_penugasan]);
     }
-
-    
 
     public function getAllUsers($nama = '', $nik = '', $kontak = '', $tanggal_lahir = '') {
         $sql = "SELECT * FROM users WHERE 1=1";
@@ -286,8 +308,10 @@ class AdminModel {
             $params[':nik'] = '%' . $nik . '%';
         }
         if (!empty($kontak)) {
-            $sql .= " AND (email LIKE :kontak OR no_hp LIKE :kontak)";
-            $params[':kontak'] = '%' . $kontak . '%';
+            // PERBAIKAN: Pisahkan parameter menjadi dua agar tidak bentrok di PDO
+            $sql .= " AND (email LIKE :kontak_email OR no_hp LIKE :kontak_hp)";
+            $params[':kontak_email'] = '%' . $kontak . '%';
+            $params[':kontak_hp'] = '%' . $kontak . '%';
         }
         if (!empty($tanggal_lahir)) {
             $sql .= " AND tanggal_lahir = :tanggal_lahir";
@@ -305,14 +329,12 @@ class AdminModel {
         return $stmt->execute([':id' => $id_user]);
     }
 
-    // Ambil user berdasarkan ID
     public function getUserById($id_user) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE id_user = :id LIMIT 1");
         $stmt->execute([':id' => $id_user]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Tambah user baru oleh admin
     public function tambahUser($data) {
         $sql = "INSERT INTO users (nama, nik, tanggal_lahir, email, no_hp, password, created_at) 
                 VALUES (:nama, :nik, :tanggal_lahir, :email, :no_hp, :password, NOW())";
@@ -327,7 +349,6 @@ class AdminModel {
         ]);
     }
 
-    // Update user oleh admin
     public function updateUser($id_user, $data) {
         if (!empty($data['password'])) {
             $sql = "UPDATE users SET nama = :nama, nik = :nik, tanggal_lahir = :tanggal_lahir, email = :email, no_hp = :no_hp, password = :password WHERE id_user = :id";
@@ -353,5 +374,94 @@ class AdminModel {
         }
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
+    }
+
+    public function updateJadwal($data) {
+        $sql = "UPDATE jadwal SET 
+                id_kereta = :id_kereta, 
+                id_koridor = :id_koridor, 
+                stasiun_asal = :stasiun_asal, 
+                stasiun_tujuan = :stasiun_tujuan, 
+                stasiun_transit = :stasiun_transit, 
+                jam_berangkat = :jam_berangkat, 
+                jam_tiba = :jam_tiba, 
+                harga = :harga, 
+                tanggal_mulai = :tanggal_mulai, 
+                tanggal_akhir = :tanggal_akhir, 
+                jenis_jadwal = :jenis_jadwal 
+                WHERE id_jadwal = :id_jadwal";
+        
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':id_kereta' => $data['id_kereta'],
+            ':id_koridor' => $data['id_koridor'],
+            ':stasiun_asal' => $data['stasiun_asal'],
+            ':stasiun_tujuan' => $data['stasiun_tujuan'],
+            ':stasiun_transit' => $data['stasiun_transit'],
+            ':jam_berangkat' => $data['jam_berangkat'],
+            ':jam_tiba' => $data['jam_tiba'],
+            ':harga' => $data['harga'],
+            ':tanggal_mulai' => $data['tanggal_mulai'],
+            ':tanggal_akhir' => $data['tanggal_akhir'],
+            ':jenis_jadwal' => $data['jenis_jadwal'],
+            ':id_jadwal' => $data['id_jadwal']
+        ]);
+    }
+
+    public function tambahStasiun($data) {
+        $sql = "INSERT INTO stasiun (kode_stasiun, nama_stasiun, kota, julukan, image_url, is_top_destination) 
+                VALUES (:kode, :nama, :kota, :julukan, :image, :is_top)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':kode' => $data['kode_stasiun'],
+            ':nama' => $data['nama_stasiun'],
+            ':kota' => $data['kota'],
+            ':julukan' => $data['julukan'],
+            ':image' => $data['image_url'],
+            ':is_top' => $data['is_top_destination']
+        ]);
+    }
+
+    public function updateStasiun($id, $data) {
+        $sql = "UPDATE stasiun SET kode_stasiun = :kode, nama_stasiun = :nama, kota = :kota, julukan = :julukan, image_url = :image, is_top_destination = :is_top WHERE id_stasiun = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':kode' => $data['kode_stasiun'],
+            ':nama' => $data['nama_stasiun'],
+            ':kota' => $data['kota'],
+            ':julukan' => $data['julukan'],
+            ':image' => $data['image_url'],
+            ':is_top' => $data['is_top_destination'],
+            ':id' => $id
+        ]);
+    }
+
+    public function hapusStasiun($id) {
+        $stmt = $this->db->prepare("DELETE FROM stasiun WHERE id_stasiun = :id");
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function getTotalPenumpangCount() {
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM penumpangs");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+
+    public function getTotalKruAktif() {
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM master_kru WHERE status_kru = 'Aktif'");
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
+    }
+
+    public function getPenumpangsByJadwal($id_jadwal) {
+        $sql = "SELECT p.*, r.tanggal_keberangkatan 
+                FROM penumpangs p 
+                JOIN reservasis r ON p.id_reservasi = r.id_reservasi 
+                WHERE r.id_jadwal = :id_jadwal";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_jadwal' => $id_jadwal]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

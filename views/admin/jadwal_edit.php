@@ -2,6 +2,17 @@
 $data['active_menu'] = 'jadwal';
 require_once __DIR__ . '/../layouts/admin/header.php'; 
 require_once __DIR__ . '/../layouts/admin/sidebar.php'; 
+
+$jdwl =$data['jadwal_edit'];
+$transitRaw = json_decode($jdwl['stasiun_transit'], true) ?? [];
+
+$transitMap = [];
+foreach($transitRaw as$item) {
+    if(is_array($item)) {$transitMap[$item['nama']] =$item['waktu'] ?? '';
+    } else {
+        $transitMap[$item] = '';
+    }
+}
 ?>
 
     <div class="flex-1 flex flex-col min-w-0">
@@ -11,19 +22,18 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
-                    <h1 class="text-xl font-extrabold text-[#0F172A] tracking-tight">Buat Jadwal Operasional</h1>
-                    <p class="text-xs text-slate-400 font-medium">Konfigurasi jadwal, armada, dan titik transit stasiun.</p>
+                    <h1 class="text-xl font-extrabold text-[#0F172A] tracking-tight">Edit Jadwal #<?= $jdwl['id_jadwal'] ?></h1>
+                    <p class="text-xs text-slate-400 font-medium">Perbarui informasi jadwal, armada, dan jam singgah stasiun.</p>
                 </div>
             </div>
         </header>
 
         <main class="flex-1 p-8 lg:p-10 overflow-y-auto">
-            <form id="form-jadwal" action="/anvo/public/jadwal/tambah" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <form id="form-jadwal-edit" action="/anvo/public/jadwal/update" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <input type="hidden" name="id_jadwal" value="<?= $jdwl['id_jadwal'] ?>">
                 
-                <!-- INPUT HIDDEN UNTUK MENAMPUNG JSON TRANSIT BERISI WAKTU -->
-                <input type="hidden" name="stasiun_transit" id="input-transit-json">
-
-                <!-- KOLOM KIRI: Form Dasar -->
+                <input type="hidden" name="stasiun_transit" id="input-transit-json-edit">
+                
                 <div class="lg:col-span-4 space-y-6">
                     <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm space-y-4">
                         <h2 class="font-bold text-[#0F172A] border-b border-slate-100 pb-3">Informasi Dasar</h2>
@@ -31,25 +41,27 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Jenis Jadwal</label>
                             <select name="jenis_jadwal" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
-                                <option value="Harian">Harian (Reguler)</option>
-                                <option value="Khusus">Khusus (Event/Ekstra)</option>
+                                <option value="Harian" <?= ($jdwl['jenis_jadwal'] == 'Harian') ? 'selected' : '' ?>>Harian (Reguler)</option>
+                                <option value="Khusus" <?= ($jdwl['jenis_jadwal'] == 'Khusus') ? 'selected' : '' ?>>Khusus (Event/Ekstra)</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Koridor Jalur</label>
-                            <select id="select-koridor" name="id_koridor" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
+                            <select id="select-koridor-edit" name="id_koridor" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
                                 <option value="">-- Pilih Koridor --</option>
-                                <?php foreach($data['koridor_list'] ?? [] as $kor): ?>
-                                    <option value="<?= $kor['id_koridor'] ?>"><?= $kor['nama_koridor'] ?></option>
+                                <?php foreach($data['koridor_list'] ?? [] as$kor): ?>
+                                    <option value="<?= $kor['id_koridor'] ?>" <?= ($jdwl['id_koridor'] ==$kor['id_koridor']) ? 'selected' : '' ?>>
+                                        <?= $kor['nama_koridor'] ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Armada Kereta</label>
-                            <select id="select-armada" name="id_kereta" required disabled class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm disabled:opacity-50 focus:outline-none focus:border-[#8C6239]">
-                                <option value="">-- Menunggu Koridor --</option>
+                            <select id="select-armada-edit" name="id_kereta" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm disabled:opacity-50 focus:outline-none focus:border-[#8C6239]">
+                                <option value="<?= $jdwl['id_kereta'] ?>" data-status="Aktif" selected><?= $jdwl['nama_kereta'] ?> (Terpilih)</option>
                             </select>
                         </div>
                     </div>
@@ -58,67 +70,64 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <h2 class="font-bold text-[#0F172A] border-b border-slate-100 pb-3">Waktu Utama & Harga</h2>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Jam Berangkat (Awal)</label>
-                                <input type="time" id="main-jam-berangkat" name="jam_berangkat" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm">
+                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Jam Berangkat</label>
+                                <input type="time" id="main-jam-berangkat-edit" name="jam_berangkat" value="<?= date('H:i', strtotime($jdwl['jam_berangkat'])) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm">
                             </div>
                             <div>
-                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Jam Tiba (Akhir)</label>
-                                <input type="time" id="main-jam-tiba" name="jam_tiba" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm">
+                                <label class="text-xs font-bold text-slate-500 block mb-1.5">Jam Tiba</label>
+                                <input type="time" id="main-jam-tiba-edit" name="jam_tiba" value="<?= date('H:i', strtotime($jdwl['jam_tiba'])) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm">
                             </div>
                         </div>
+                        
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Mulai</label>
-                                <input type="date" name="tanggal_mulai" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                                <input type="date" name="tanggal_mulai" value="<?= $jdwl['tanggal_mulai'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Akhir</label>
-                                <input type="date" name="tanggal_akhir" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                                <input type="date" name="tanggal_akhir" value="<?= $jdwl['tanggal_akhir'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                             </div>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Harga Tiket (Rp)</label>
-                            <input type="number" name="harga" required placeholder="Contoh: 250000" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm">
+                            <input type="number" name="harga" value="<?= floor($jdwl['harga']) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm">
                         </div>
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: UI Peta Transit Interaktif & Input Jam -->
                 <div class="lg:col-span-8 space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm min-h-[400px]">
                         <div class="flex justify-between items-end mb-8">
                             <div>
                                 <h2 class="text-xl font-extrabold text-[#0F172A]">Konfigurasi Stasiun & Jam Singgah</h2>
-                                <p class="text-xs text-slate-400 mt-1">Centang stasiun pemberhentian dan atur jam kedatangan/keberangkatannya.</p>
+                                <p class="text-xs text-slate-400 mt-1">Sesuaikan kembali jam kedatangan dan keberangkatan tiap stasiun.</p>
                             </div>
-                            <button type="button" id="btn-reverse-route" class="hidden px-4 py-2.5 bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm items-center gap-2" title="Putar Arah Rute">
+                            
+                            <button type="button" id="btn-reverse-route" class="inline-flex px-4 py-2.5 bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm items-center gap-2" title="Tukar Keberangkatan dan Tujuan">
                                 <i class="fa-solid fa-arrow-right-arrow-left"></i> Putar Arah (Z - A)
                             </button>
                         </div>
 
-                        <!-- Area Peta Interaktif -->
-                        <div id="transit-map-container" class="hidden">
+                        <div id="transit-map-container">
                             <div class="w-full overflow-x-auto custom-scrollbar pb-12 pt-4">
-                                <div id="transit-line" class="flex items-center min-w-max px-4">
-                                    <!-- Node Stasiun dirender dinamis via JS -->
-                                </div>
+                                <div id="transit-line" class="flex items-center min-w-max px-4"></div>
                             </div>
                             
-                            <!-- Hidden input pendukung rute asal & tujuan utama -->
-                            <input type="hidden" name="stasiun_asal" id="input-asal">
-                            <input type="hidden" name="stasiun_tujuan" id="input-tujuan">
+                            <input type="hidden" name="stasiun_asal" id="input-asal-edit">
+                            <input type="hidden" name="stasiun_tujuan" id="input-tujuan-edit">
                         </div>
-                        
-                        <div id="empty-state" class="py-20 text-center text-slate-400 border-2 border-dashed border-slate-100 rounded-3xl mt-4">
+
+                        <div id="empty-state" class="hidden py-20 text-center text-slate-400 border-2 border-dashed border-slate-100 rounded-3xl mt-4">
                             <i class="fa-solid fa-map-location-dot text-4xl mb-3 text-slate-300 block"></i>
                             Pilih Koridor Jalur terlebih dahulu untuk memuat peta stasiun.
                         </div>
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="/anvo/public/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal</a>
-                        <button type="submit" class="px-8 py-3.5 bg-[#0F172A] hover:bg-[#8C6239] text-white rounded-2xl font-semibold text-sm transition-all shadow-md">
-                            Simpan Jadwal Operasional
+                        <a href="/anvo/public/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal Edit</a>
+                        <button type="submit" class="px-8 py-3.5 bg-[#8C6239] hover:bg-[#74502e] text-white rounded-2xl font-semibold text-sm transition-all shadow-md">
+                            Simpan Perubahan Jadwal
                         </button>
                     </div>
                 </div>
@@ -127,6 +136,8 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     </div>
 
     <script>
+        const stasiunAsalLama = "<?= $jdwl['stasiun_asal'] ?>";
+        const transitMapLama = <?= json_encode($transitMap) ?>;
         let currentStations = []; 
 
         function renderTransitMap(data) {
@@ -134,25 +145,27 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             transitLine.innerHTML = '';
             if(data.length < 2) return;
 
-            document.getElementById('input-asal').value = data[0].nama_stasiun;
-            document.getElementById('input-tujuan').value = data[data.length-1].nama_stasiun;
+            document.getElementById('input-asal-edit').value = data[0].nama_stasiun;
+            document.getElementById('input-tujuan-edit').value = data[data.length-1].nama_stasiun;
 
             data.forEach((st, index) => {
                 const isFirstOrLast = (index === 0 || index === data.length - 1);
-                
+                let isChecked = (transitMapLama.hasOwnProperty(st.nama_stasiun) || isFirstOrLast) ? 'checked' : '';
+                let savedTime = transitMapLama[st.nama_stasiun] || '';
+
                 const node = document.createElement('div');
                 node.className = 'flex items-center transit-node-item';
                 node.innerHTML = `
                     <div class="relative flex flex-col items-center group">
                         <label class="cursor-pointer flex flex-col items-center ${isFirstOrLast ? 'pointer-events-none' : ''}">
-                            <input type="checkbox" value="${st.nama_stasiun}" ${isFirstOrLast ? 'checked' : 'checked'} class="transit-checkbox peer hidden">
-                            <div class="w-6 h-6 rounded-full border-[5px] bg-white transition-all duration-300 z-10 ${isFirstOrLast ? 'border-emerald-500' : 'border-slate-300 peer-checked:border-[#2B9BFB] group-hover:scale-110'}"></div>
-                            <span class="text-xs mt-2 font-bold ${isFirstOrLast ? 'text-emerald-600' : 'text-slate-700'}">
+                            <input type="checkbox" value="${st.nama_stasiun}" ${isChecked} class="transit-checkbox peer hidden">
+                            <div class="w-6 h-6 rounded-full border-[5px] bg-white transition-all duration-300 z-10 ${isFirstOrLast ? 'border-amber-500' : 'border-slate-300 peer-checked:border-[#2B9BFB] group-hover:scale-110'}"></div>
+                            <span class="text-xs mt-2 font-bold ${isFirstOrLast ? 'text-amber-700' : 'text-slate-700'}">
                                 ${st.nama_stasiun.split(' - ')[0]}
                             </span>
                         </label>
                         <div class="mt-2">
-                            <input type="time" class="transit-time w-28 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold text-center focus:outline-none focus:border-[#2B9BFB]" required title="Jam Singgah">
+                            <input type="time" value="${savedTime}" class="transit-time w-28 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-semibold text-center focus:outline-none focus:border-[#2B9BFB]" required title="Jam Singgah">
                         </div>
                     </div>
                     ${index < data.length - 1 ? '<div class="w-20 sm:w-28 h-1.5 bg-slate-200 mx-2 mb-10"></div>' : ''}
@@ -162,20 +175,32 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('transit-map-container').classList.remove('hidden');
-            document.getElementById('btn-reverse-route').classList.remove('hidden');
-            document.getElementById('btn-reverse-route').classList.add('inline-flex');
         }
 
-        document.getElementById('select-koridor').addEventListener('change', function() {
+        window.addEventListener('DOMContentLoaded', () => {
+            const idKoridorAwal = document.getElementById('select-koridor-edit').value;
+            if(idKoridorAwal) {
+                fetch('/anvo/public/jadwal/get_stasiun_ajax/' + idKoridorAwal)
+                .then(r => r.json())
+                .then(data => {
+                    currentStations = data;
+                    if (data.length > 1 && data[0].nama_stasiun !== stasiunAsalLama) {
+                        currentStations.reverse();
+                    }
+                    renderTransitMap(currentStations);
+                });
+            }
+        });
+
+        document.getElementById('select-koridor-edit').addEventListener('change', function() {
             const idKoridor = this.value;
-            const selectArmada = document.getElementById('select-armada');
+            const selectArmada = document.getElementById('select-armada-edit');
 
             if (!idKoridor) {
                 selectArmada.innerHTML = '<option value="">-- Menunggu Koridor --</option>';
                 selectArmada.disabled = true;
                 document.getElementById('transit-map-container').classList.add('hidden');
                 document.getElementById('empty-state').classList.remove('hidden');
-                document.getElementById('btn-reverse-route').classList.add('hidden');
                 currentStations = [];
                 return;
             }
@@ -183,7 +208,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             fetch('/anvo/public/jadwal/get_kereta_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
-                    selectArmada.innerHTML = '<option value="">-- Pilih Armada --</option>';
+                    selectArmada.innerHTML = '<option value="">-- Pilih Armada Kereta --</option>';
                     data.forEach(k => {
                         const opt = document.createElement('option');
                         opt.value = k.id_kereta;
@@ -211,9 +236,9 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 setTimeout(() => icon.classList.remove('fa-spin'), 300);
             }
         });
-
-        document.getElementById('form-jadwal').addEventListener('submit', function(e) {
-            const selectArmada = document.getElementById('select-armada');
+        
+        document.getElementById('form-jadwal-edit').addEventListener('submit', function(e) {
+            const selectArmada = document.getElementById('select-armada-edit');
             const selectedOption = selectArmada.options[selectArmada.selectedIndex];
             
             if (selectedOption) {
@@ -239,11 +264,10 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 }
             });
 
-            document.getElementById('input-transit-json').value = JSON.stringify(transitArray);
-
+            document.getElementById('input-transit-json-edit').value = JSON.stringify(transitArray);
             if(transitArray.length > 0) {
-                document.getElementById('main-jam-berangkat').value = transitArray[0].waktu;
-                document.getElementById('main-jam-tiba').value = transitArray[transitArray.length - 1].waktu;
+                document.getElementById('main-jam-berangkat-edit').value = transitArray[0].waktu;
+                document.getElementById('main-jam-tiba-edit').value = transitArray[transitArray.length - 1].waktu;
             }
         });
     </script>

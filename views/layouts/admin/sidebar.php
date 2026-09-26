@@ -35,7 +35,7 @@
                     <i class="fa-solid fa-train w-5 text-center <?= ($data['active_menu'] == 'armada') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Armada Kereta</span>
                 </a>
-                <a href="#" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'stasiun') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
+                <a href="/anvo/public/stasiun" class="flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-semibold <?= ($data['active_menu'] == 'stasiun') ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50' ?> transition-all group relative">
                     <i class="fa-solid fa-map-location-dot w-5 text-center <?= ($data['active_menu'] == 'stasiun') ? '' : 'text-slate-400' ?> text-base"></i>
                     <span class="menu-label whitespace-nowrap">Data Stasiun</span>
                 </a>

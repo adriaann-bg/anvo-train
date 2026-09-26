@@ -4,6 +4,19 @@ require_once __DIR__ . '/../layouts/admin/header.php';
 require_once __DIR__ . '/../layouts/admin/sidebar.php'; 
 ?>
 
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<style>
+    .dataTables_wrapper .dataTables_filter input { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.3rem 0.75rem; outline: none; margin-left: 0.5rem; }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #8C6239; }
+    .dataTables_wrapper .dataTables_length select { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.2rem 0.5rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #0F172A !important; color: white !important; border: none; border-radius: 0.5rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: #8C6239 !important; color: white !important; border: none; border-radius: 0.5rem; }
+    table.dataTable thead th { border-bottom: 2px solid #f1f5f9; }
+    table.dataTable.no-footer { border-bottom: none; }
+</style>
+
     <div class="flex-1 flex flex-col min-w-0 relative">
 
         <!-- TOAST NOTIFICATION -->
@@ -46,7 +59,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse">
+                    <table id="dataTable" class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-slate-100 text-[11px] uppercase text-slate-400 font-bold tracking-wider">
                                 <th class="py-3.5 px-4">No.</th>
@@ -519,6 +532,22 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
             openModal('modal-detail-armada');
         }
+
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "lengthMenu": "Tampilkan _MENU_ data",
+                    "zeroRecords": "Tidak ada data yang ditemukan",
+                    "info": "Halaman _PAGE_ dari _PAGES_",
+                    "infoEmpty": "Tidak ada data",
+                    "search": "Cari:",
+                    "paginate": { "first": "Awal", "last": "Akhir", "next": "Lanjut", "previous": "Kembali" }
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, -1] } // Nonaktifkan sortir untuk kolom No (0) dan Aksi (terakhir)
+                ]
+            });
+        });
     </script>
 
 <?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>

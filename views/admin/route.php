@@ -94,6 +94,22 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
     <script>
         setTimeout(() => { const el = document.getElementById('flash-alert'); if(el) el.remove(); }, 3000);
+
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "lengthMenu": "Tampilkan _MENU_ data",
+                    "zeroRecords": "Tidak ada data yang ditemukan",
+                    "info": "Halaman _PAGE_ dari _PAGES_",
+                    "infoEmpty": "Tidak ada data",
+                    "search": "Cari:",
+                    "paginate": { "first": "Awal", "last": "Akhir", "next": "Lanjut", "previous": "Kembali" }
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, -1] } // Nonaktifkan sortir untuk kolom No (0) dan Aksi (terakhir)
+                ]
+            });
+        });
     </script>
 
 <?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>
