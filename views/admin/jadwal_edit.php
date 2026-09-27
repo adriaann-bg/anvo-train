@@ -16,7 +16,7 @@ foreach($transitRaw as$item) {
 ?>
 
     <div class="flex-1 flex flex-col min-w-0">
-        <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-25 shadow-sm">
+        <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
                 <a href="/anvo/public/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left"></i>

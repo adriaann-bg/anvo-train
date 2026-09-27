@@ -464,4 +464,88 @@ class AdminModel {
         $stmt->execute([':id_jadwal' => $id_jadwal]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getSchedulesOverlap($start_date, $end_date, $kelas = '', $asal = '', $tujuan = '') {
+        $sql = "SELECT jadwal.*, kereta.nama_kereta, kereta.jenis_kelas 
+                FROM jadwal 
+                JOIN kereta ON jadwal.id_kereta = kereta.id_kereta 
+                WHERE jadwal.tanggal_mulai <= :end_date 
+                AND (jadwal.tanggal_akhir IS NULL OR jadwal.tanggal_akhir >= :start_date)";
+        
+        $params = [':start_date' => $start_date, ':end_date' => $end_date];
+
+        if (!empty($kelas)) {
+            $sql .= " AND kereta.jenis_kelas LIKE :kelas";
+            $params[':kelas'] = '%' . $kelas . '%';
+        }
+        $sql .= " ORDER BY jadwal.jam_berangkat ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rawJadwal = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $filtered = [];
+        foreach ($rawJadwal as $j) {
+            $transit = json_decode($j['stasiun_transit'], true);
+            if (is_string($transit)) { $transit = json_decode($transit, true); }
+            
+            $transitNamas = [];
+            if (is_array($transit)) {
+                foreach ($transit as $t) {
+                    $transitNamas[] = is_array($t) ? ($t['nama'] ?? '') : $t;
+                }
+            } else {
+                $transitNamas = [$j['stasiun_asal'], $j['stasiun_tujuan']];
+            }
+
+            $match = true;
+            if (!empty($asal)) {
+                $foundAsal = false;
+                $asalIdx = -1;
+                foreach ($transitNamas as $idx => $st) {
+                    if (stripos($st, $asal) !== false) {
+                        $foundAsal = true;
+                        $asalIdx = $idx;
+                        break;
+                    }
+                }
+                if (!$foundAsal) { $match = false; }
+            }
+
+            if (!empty($tujuan) && $match) {
+                $foundTujuan = false;
+                $tujuanIdx = -1;
+                foreach ($transitNamas as $idx => $st) {
+                    if (stripos($st, $tujuan) !== false) {
+                        $foundTujuan = true;
+                        $tujuanIdx = $idx;
+                        break;
+                    }
+                }
+                if (!$foundTujuan || (!empty($asal) && $asalIdx >= $tujuanIdx)) { $match = false; }
+            }
+            if ($match) { $filtered[] = $j; }
+        }
+        return $filtered;
+    }
+
+    public function getKruByJadwalAndDate($id_jadwal, $tanggal) {
+        $sql = "SELECT jp.*, mk.* 
+                FROM jadwal_penugasan_kru jp 
+                JOIN master_kru mk ON jp.id_kru = mk.id_kru 
+                WHERE jp.id_jadwal = :id_jadwal AND jp.tanggal_tugas = :tanggal";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_jadwal' => $id_jadwal, ':tanggal' => $tanggal]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getPenumpangsByJadwalAndDate($id_jadwal, $tanggal) {
+        $sql = "SELECT p.*, r.tanggal_keberangkatan 
+                FROM penumpangs p 
+                JOIN reservasis r ON p.id_reservasi = r.id_reservasi 
+                WHERE r.id_jadwal = :id_jadwal AND DATE(r.tanggal_keberangkatan) = :tanggal";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id_jadwal' => $id_jadwal, ':tanggal' => $tanggal]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

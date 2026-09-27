@@ -15,80 +15,112 @@
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
+<!-- ========================================== -->
+<!-- 1. CEK SESSION, PIN, & ROLE DI AWAL HEADER -->
+<!-- ========================================== -->
+<?php 
+$userDataSession = null;
+if(isset($_SESSION['user_id'])) {
+    $dbCheck = Database::getInstance()->getConnection();
+    $stmtCheck = $dbCheck->prepare("SELECT pin, role FROM users WHERE nik = :nik LIMIT 1");
+    $stmtCheck->execute([':nik' => $_SESSION['user_id']]);
+    $userDataSession = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+}
+?>
+
+<!-- 2. LOGIKA POP-UP PIN WAJIB (Jika user biasa belum punya PIN) -->
+<?php if(isset($_SESSION['user_id']) && $userDataSession && empty($userDataSession['pin']) && $userDataSession['role'] !== 'admin'): ?>
+    <div id="pinModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900 bg-opacity-80 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md pointer-events-auto border border-gray-100">
+            <div class="text-center mb-6">
+                <img src="/anvo/public/img/logo-anvo-berwarna.svg" alt="Anvo" class="h-8 mx-auto mb-4">
+                <h3 class="text-xl font-bold text-[#0F172A]">Buat PIN Keamanan Transaksi</h3>
+                <p class="text-sm text-gray-500 mt-2">Demi keamanan reservasi Anda, silakan buat 6 digit PIN rahasia.</p>
+            </div>
+            <form action="/anvo/public/auth/simpan_pin" method="POST">
+                <div class="mb-6">
+                    <input type="password" name="pin" id="pin" maxlength="6" pattern="\d{6}" class="w-full border border-gray-300 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-[#8C6239] focus:outline-none text-center text-xl tracking-[0.5em]" required placeholder="••••••">
+                </div>
+                <button type="submit" class="w-full bg-[#8C6239] hover:bg-[#734E2D] text-white py-3 rounded-2xl font-medium transition-all shadow-lg">
+                    Simpan PIN & Lanjutkan
+                </button>
+            </form>
+        </div>
+    </div>
+<?php endif; ?>
 
     <!-- Navbar Desktop & Mobile Header -->
-    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent border-b border-transparent h-20">
+<nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent border-b border-transparent h-20">
+    <div class="w-full h-full relative flex justify-between items-center px-4 sm:px-8 lg:px-12 xl:px-16">
 
-        <!-- PERUBAHAN: Hapus max-w-7xl mx-auto, ganti dengan w-full dan atur padding responsif -->
-        <div class="w-full h-full relative flex justify-between items-center px-4 sm:px-8 lg:px-12 xl:px-16">
+        <!-- Kiri: Logo -->
+        <div class="flex-shrink-0 flex items-center z-10">
+            <img src="/anvo/public/img/logo-anvo-berwarna.svg" alt="ANVO Logo" class="h-8 w-auto">
+        </div>
 
-            <!-- Kiri: Logo -->
-            <div class="flex-shrink-0 flex items-center z-10">
-                <img src="/anvo/public/img/logo-anvo-berwarna.svg" alt="ANVO Logo" class="h-8 w-auto">
-            </div>
+        <!-- Tengah: Desktop Menu Dinamis Berdasarkan Role -->
+        <!-- Tengah: Desktop Menu (Seragam untuk User & Admin tanpa ikon) -->
+        <div class="hidden md:flex space-x-10 h-full items-center absolute left-1/2 -translate-x-1/2 z-0">
 
-            <!-- Tengah: Desktop Menu (Posisi absolut di tengah layar tetap aman) -->
-            <div class="hidden md:flex space-x-10 h-full items-center absolute left-1/2 -translate-x-1/2 z-0">
+            <a href="/anvo/public/" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+                Beranda
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
+            </a>
 
-                <a href="/anvo/public/" class="relative h-full flex items-center text-[#8C6239] font-medium group">
-                    Beranda
-                    <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-100 origin-center transition-transform duration-300"></span>
-                </a>
+            <a href="/anvo/public/jadwal" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+                Beli Tiket
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
+            </a>
 
-                <a href="/anvo/public/jadwal" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
-                    Beli Tiket
-                    <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
-                </a>
+            <?php if(isset($_SESSION['user_id'])): ?>
+            <a href="/anvo/public/tiket" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+                Tiket Saya
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
+            </a>
+            <?php endif; ?>
 
-                <?php if(isset($_SESSION['user_id'])): ?>
-                <a href="/anvo/public/tiket" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
-                    Tiket Saya
-                    <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
-                </a>
-                <?php endif; ?>
-            </div>
+            <!-- Menu Tambahan Khusus Admin dengan Format yang Sama Persis -->
+            <?php if(isset($userDataSession) && $userDataSession['role'] === 'admin'): ?>
+            <a href="/anvo/public/admin" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+                Dashboard Admin
+                <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
+            </a>
+            <?php endif; ?>
+
+        </div>
 
         <!-- Kanan: Desktop Auth Button & Profile -->
-            <div class="hidden md:flex items-center z-20">
-                <?php if(isset($_SESSION['user_id'])): ?>
-                        <!-- TAMPILAN JIKA SUDAH LOGIN: Tombol Profil -->
-                    <div class="relative" id="profile-dropdown-wrapper">
-                        <button onclick="toggleProfileMenu()" class="flex items-center gap-3 border border-slate-400 rounded-[32px] py-1.5 pl-1.5 pr-4 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#8C6239]/30">
-                            <!-- Avatar Placeholder (Bisa diganti foto asli dari database nantinya) -->
+        <div class="hidden md:flex items-center z-20">
+            <?php if(isset($_SESSION['user_id'])): ?>
+                <div class="relative" id="profile-dropdown-wrapper">
+                    <button onclick="toggleProfileMenu()" class="flex items-center gap-3 border border-slate-400 rounded-[32px] py-1.5 pl-1.5 pr-4 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#8C6239]/30">
                         <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['user_nama']) ?>&background=2B9BFB&color=fff&rounded=true" alt="Avatar" class="w-9 h-9 rounded-full object-cover">
+                        <div class="text-left hidden lg:block">
+                            <p class="text-[13px] font-semibold text-[#0F172A] leading-tight truncate max-w-[140px]"><?= htmlspecialchars($_SESSION['user_nama']) ?></p>
+                            <p class="text-[11px] text-gray-500 leading-tight truncate max-w-[140px]"><?= htmlspecialchars($_SESSION['user_email']) ?></p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-gray-600 text-[10px] ml-1"></i>
+                    </button>
 
-                            <div class="text-left hidden lg:block">
-                                <p class="text-[13px] font-semibold text-[#0F172A] leading-tight truncate max-w-[140px]"><?= htmlspecialchars($_SESSION['user_nama']) ?></p>
-                                <p class="text-[11px] text-gray-500 leading-tight truncate max-w-[140px]"><?= htmlspecialchars($_SESSION['user_email']) ?></p>
-                            </div>
-                            <i class="fa-solid fa-chevron-down text-gray-600 text-[10px] ml-1"></i>
-                        </button>
-
-                        <!-- Isi Dropdown Menu -->
-                        <div id="profile-menu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden transform transition-all">
-                            <div class="p-2">
-                                <a href="/anvo/public/profil" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#8C6239] rounded-xl transition-colors">
-                                    <i class="fa-regular fa-user w-5 text-center mr-2"></i> Profil Saya
-                                </a>
-                                <a href="/anvo/public/pengaturan" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#8C6239] rounded-xl transition-colors">
-                                    <i class="fa-solid fa-gear w-5 text-center mr-2"></i> Pengaturan
-                                </a>
-                            </div>
-                            <hr class="border-gray-100">
-                            <div class="p-2">
-                                <a href="/anvo/public/auth/logout" onclick="confirmLogout(event)" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                                    <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-2"></i> Keluar
-                                </a>
-                            </div>
+                    <!-- Isi Dropdown Menu -->
+                    <div id="profile-menu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden transform transition-all">
+                        <div class="p-2">
+                            <?php if(isset($userDataSession) && $userDataSession['role'] !== 'admin'): ?>
+                            <a href="/anvo/public/profil" class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#8C6239] rounded-xl transition-colors">
+                                <i class="fa-regular fa-user w-5 text-center mr-2"></i> Profil Saya
+                            </a>
+                            <?php endif; ?>
+                            <a href="/anvo/public/auth/logout" onclick="confirmLogout(event)" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-2"></i> Keluar
+                            </a>
                         </div>
                     </div>
-                    <?php else: ?>
-                        <!-- TAMPILAN JIKA BELUM LOGIN: Tombol Mulai -->
-                    <a href="/anvo/public/auth/login" class="bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white px-7 py-2.5 rounded-full font-medium transition-all duration-300 shadow-md">
-                        Mulai
-                    </a>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php else: ?>
+                <a href="/anvo/public/auth/login" class="bg-[#8C6239] hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] text-white px-7 py-2.5 rounded-full font-medium transition-all duration-300 shadow-md">
+                    Mulai
+                </a>
+            <?php endif; ?>
 
             <!-- Mobile Hamburger Button -->
             <div class="md:hidden flex items-center z-10">

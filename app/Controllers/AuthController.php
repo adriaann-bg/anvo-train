@@ -438,5 +438,34 @@ class AuthController extends Controller {
             }
         }
     }
+
+    // Tambahkan di AuthController.php atau ProfileController.php
+    public function simpan_pin() {
+        if (session_status() == PHP_SESSION_NONE) { session_start(); }
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['pin'])) {
+            $pin = trim($_POST['pin']);
+            
+            // Validasi harus 6 digit angka
+            if (strlen($pin) !== 6 || !is_numeric($pin)) {
+                $_SESSION['error'] = 'PIN harus tepat 6 digit angka!';
+                header('Location: /anvo/public/');
+                exit;
+            }
+
+            $nik = $_SESSION['user_id'];
+            $pin_hashed = password_hash($pin, PASSWORD_BCRYPT);
+
+            $userModel = $this->model('User');
+            if ($userModel->updatePin($nik, $pin_hashed)) {
+                $_SESSION['success'] = 'PIN berhasil dibuat! Selamat datang di ANVO.';
+            } else {
+                $_SESSION['error'] = 'Gagal menyimpan PIN.';
+            }
+            
+            header('Location: /anvo/public/');
+            exit;
+        }
+    }
 }
 ?>

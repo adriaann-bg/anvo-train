@@ -18,7 +18,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 </style>
 
     <div class="flex-1 flex flex-col min-w-0 bg-slate-50/50">
-        <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-25 shadow-sm">
+        <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div>
                 <h1 class="text-xl font-extrabold text-[#0F172A] tracking-tight">Master Data Pengguna (User)</h1>
                 <p class="text-xs text-slate-400 font-medium">Daftar akun penumpang yang terdaftar pada sistem ANVO.</p>

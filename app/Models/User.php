@@ -106,5 +106,12 @@ class User {
         $stmt->bindParam(':nik', $nik);
         return $stmt->execute();
     }
+    
+    // Tambahkan fungsi ini di app/Models/User.php
+    public function updatePin($nik, $pin_hashed) {
+        $sql = "UPDATE users SET pin = :pin WHERE nik = :nik";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':pin' => $pin_hashed, ':nik' => $nik]);
+    }
 }
 ?>
