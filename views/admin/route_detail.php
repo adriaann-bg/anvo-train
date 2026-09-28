@@ -4,11 +4,12 @@ require_once __DIR__ . '/../layouts/admin/header.php';
 require_once __DIR__ . '/../layouts/admin/sidebar.php'; 
 $namaKoridor = $data['koridor']['nama_koridor'] ?? 'Detail Koridor';
 $idKoridor = $data['koridor']['id_koridor'] ?? '';
+$keteranganKoridor = $data['koridor']['keterangan'] ?? '';
 ?>
 
     <div class="flex-1 flex flex-col min-w-0 relative">
 
-        <!-- TOAST NOTIFICATION KUSTOM (Menggantikan Alert Sistem) -->
+        <!-- TOAST NOTIFICATION KUSTOM -->
         <div id="custom-toast" class="fixed bottom-8 right-8 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-semibold">
             <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
             <span id="toast-message">Pesan notifikasi berhasil.</span>
@@ -17,7 +18,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
         <!-- TOP BAR -->
         <header class="h-20 bg-white border-b border-slate-200/60 px-6 sm:px-8 flex justify-between items-center sticky top-0 z-25 shadow-sm">
             <div class="flex items-center gap-3">
-                <a href="/anvo/public/route" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all" title="Kembali">
+                <!-- Diperbarui ke jalur admin -->
+                <a href="/anvo/public/admin/route" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all" title="Kembali">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
@@ -26,7 +28,15 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 </div>
             </div>
 
-            <div>
+            <div class="flex items-center gap-2">
+                <!-- TOMBOL EDIT KORIDOR -->
+                <button onclick="openModal('modal-edit-koridor')" class="bg-amber-50 text-[#8C6239] hover:bg-[#8C6239] hover:text-white px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5" title="Edit Nama & Deskripsi">
+                    <i class="fa-solid fa-pen-to-square"></i> <span class="hidden sm:inline">Edit Koridor</span>
+                </button>
+                <!-- TOMBOL HAPUS KORIDOR -->
+                <a href="/anvo/public/admin/route/hapus_koridor/<?= $idKoridor ?>" onclick="return confirm('PERINGATAN: Menghapus koridor akan melepaskan seluruh konfigurasi stasiun dan jalur terkait. Lanjutkan?')" class="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5" title="Hapus Koridor">
+                    <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Hapus</span>
+                </a>
                 <button onclick="openModal('modal-peta-rute')" class="bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all shadow-sm flex items-center gap-2">
                     <i class="fa-solid fa-map"></i> <span class="hidden sm:inline">Peta Rute Visual</span>
                 </button>
@@ -60,7 +70,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                             <i class="fa-solid fa-circle-info mr-1"></i> Semua stasiun master sudah dimasukkan ke dalam koridor ini.
                         </div>
                     <?php else: ?>
-                        <form id="form-tambah-stasiun" action="/anvo/public/route/tambah_stasiun_koridor/<?= $idKoridor ?>" method="POST" class="space-y-4">
+                        <!-- Diperbarui ke jalur admin -->
+                        <form id="form-tambah-stasiun" action="/anvo/public/admin/route/tambah_stasiun_koridor/<?= $idKoridor ?>" method="POST" class="space-y-4">
                             <div>
                                 <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Stasiun</label>
                                 <select name="nama_stasiun" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
@@ -117,7 +128,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                                             <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
                                         </button>
                                         
-                                        <a href="/anvo/public/route/hapus_stasiun/<?= $idKoridor ?>/<?= $st['id_koridor_stasiun'] ?>" onclick="return confirm('Hapus stasiun ini dari koridor?')" class="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
+                                        <!-- Diperbarui ke jalur admin -->
+                                        <a href="/anvo/public/admin/route/hapus_stasiun/<?= $idKoridor ?>/<?= $st['id_koridor_stasiun'] ?>" onclick="return confirm('Hapus stasiun ini dari koridor?')" class="p-2.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
                                     </div>
@@ -164,7 +176,7 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                         <tbody class="text-sm divide-y divide-slate-50">
                             <?php if(empty($data['kereta_berdinas'])): ?>
                                 <tr>
-                                    <td colspan="5" class="py-8 text-center text-slate-400 font-medium text-xs">Belum ada armada kereta yang ditugaskan pada koridor ini.</td>
+                                    <td colspan="6" class="py-8 text-center text-slate-400 font-medium text-xs">Belum ada armada kereta yang ditugaskan pada koridor ini.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php $no=1; foreach($data['kereta_berdinas'] as $kb): ?>
@@ -179,7 +191,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                                             </span>
                                         </td>
                                         <td class="py-3.5 px-4 text-center">
-                                            <a href="/anvo/public/route/lepas_kereta_koridor/<?= $idKoridor ?>/<?= $kb['id_kereta'] ?>" onclick="return confirm('Kembalikan armada ini ke Pool (lepas dari koridor)?')" class="px-3 py-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                                            <!-- Diperbarui ke jalur admin -->
+                                            <a href="/anvo/public/admin/route/lepas_kereta_koridor/<?= $idKoridor ?>/<?= $kb['id_kereta'] ?>" onclick="return confirm('Kembalikan armada ini ke Pool (lepas dari koridor)?')" class="px-3 py-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs font-semibold transition-all">
                                                 Lepas
                                             </a>
                                         </td>
@@ -193,7 +206,29 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
         </main>
     </div>
 
-    <!-- MODAL EDIT STASIUN (Menggabungkan stasiun tersedia + stasiun aktif saat ini) -->
+    <!-- MODAL EDIT KORIDOR (BARU) -->
+    <div id="modal-edit-koridor" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-fade-in">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <h3 class="font-extrabold text-lg text-[#0F172A]">Edit Informasi Koridor</h3>
+                <button onclick="closeModal('modal-edit-koridor')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form action="/anvo/public/admin/route/edit_koridor/<?= $idKoridor ?>" method="POST" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1.5">Nama Koridor</label>
+                    <input type="text" name="nama_koridor" value="<?= htmlspecialchars($namaKoridor) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-500 block mb-1.5">Keterangan / Deskripsi</label>
+                    <textarea name="keterangan" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]"><?= htmlspecialchars($keteranganKoridor) ?></textarea>
+                </div>
+                <button type="submit" class="w-full bg-[#0F172A] hover:bg-[#8C6239] text-white py-3.5 rounded-2xl font-semibold transition-all shadow-md">Simpan Perubahan Koridor</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT STASIUN -->
     <div id="modal-edit-stasiun" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-fade-in">
             <div class="flex justify-between items-center border-b border-slate-100 pb-4">
@@ -201,12 +236,12 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 <button onclick="closeModal('modal-edit-stasiun')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="/anvo/public/route/edit_stasiun/<?= $idKoridor ?>" method="POST" class="space-y-4">
+            <!-- Diperbarui ke jalur admin -->
+            <form action="/anvo/public/admin/route/edit_stasiun/<?= $idKoridor ?>" method="POST" class="space-y-4">
                 <input type="hidden" name="id_koridor_stasiun" id="edit-id-koridor-stasiun">
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Ganti Nama Stasiun</label>
                     <select name="nama_stasiun" id="edit-nama-stasiun" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
-                        <!-- Opsi stasiun aktif saat ini akan disuntikkan via JS agar selalu muncul -->
                     </select>
                 </div>
                 <button type="submit" class="w-full bg-[#0F172A] hover:bg-[#8C6239] text-white py-3.5 rounded-2xl font-semibold transition-all shadow-md">Simpan Perubahan</button>
@@ -222,11 +257,11 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 <button onclick="closeModal('modal-tambah-kereta-koridor')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="/anvo/public/route/tambah_kereta_koridor/<?= $idKoridor ?>" method="POST" class="space-y-4">
+            <!-- Diperbarui ke jalur admin -->
+            <form action="/anvo/public/admin/route/tambah_kereta_koridor/<?= $idKoridor ?>" method="POST" class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Seri / Nama Kereta</label>
                     <select name="id_kereta" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
-                        <!-- Data diambil dari master kereta -->
                         <?php foreach($data['kereta_tersedia'] ?? [] as $sk): ?>
                             <option value="<?= $sk['id_kereta'] ?>"><?= $sk['nama_kereta'] ?> (<?= $sk['kecepatan_maksimal'] ?> km/h)</option>
                         <?php endforeach; ?>
@@ -237,14 +272,9 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
         </div>
     </div>
 
-    <!-- Pustaka html2pdf untuk otomatis unduh PDF langsung -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <!-- MODAL PETA RUTE VISUAL (Mode Light & Format A4 Official Document) -->
+    <!-- MODAL PETA RUTE VISUAL -->
     <div id="modal-peta-rute" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-3xl rounded-[2.5rem] p-8 sm:p-10 shadow-2xl space-y-6 animate-fade-in max-h-[95vh] overflow-y-auto custom-scrollbar border border-slate-200/60">
-            
-            <!-- HEADER MODAL (Tombol X di atas akan disembunyikan saat cetak/pdf) -->
             <div id="modal-top-bar" class="flex justify-between items-center border-b border-slate-100 pb-4">
                 <div>
                     <h3 class="font-extrabold text-lg text-[#0F172A]">Dokumen Resmi Peta & Informasi Koridor</h3>
@@ -253,15 +283,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 <button onclick="closeModal('modal-peta-rute')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- AREA DOKUMEN RESMI (Format A4 - Header/Body di Atas, Footer di Bawah) -->
             <div id="print-area-map" class="p-8 sm:p-10 bg-white text-[#0F172A] rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-                
-                <!-- BAGIAN ATAS (HEADER & KONTEN) -->
                 <div class="space-y-8">
-                    <!-- Aksen Elegan -->
-                    <div class="absolute right-[-20px] top-[-20px] w-40 h-40 bg-slate-50 rounded-full -z-0 pointer-events-none"></div>
-
-                    <!-- 1. Header & Logo Perusahaan (Diperbesar ukurannya) -->
                     <div class="flex justify-between items-start border-b border-slate-100 pb-6 relative z-10">
                         <div class="flex items-center gap-4">
                             <img src="/anvo/public/img/logo-anvo-berwarna.svg" alt="ANVO Logo" class="w-14 h-14 object-contain" onerror="this.style.display='none'">
@@ -276,15 +299,13 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                         </div>
                     </div>
 
-                    <!-- 2 & 3. Nama & Deskripsi Koridor -->
                     <div class="space-y-1 relative z-10">
                         <h5 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Deskripsi Koridor</h5>
                         <p class="text-sm font-medium text-slate-600 leading-relaxed">
-                            <?= htmlspecialchars($data['koridor']['keterangan'] ?? 'Koridor jalur utama kereta cepat berkecepatan tinggi dengan integrasi transit mutakhir.') ?>
+                            <?= htmlspecialchars($keteranganKoridor ?: 'Koridor jalur utama kereta cepat berkecepatan tinggi dengan integrasi transit mutakhir.') ?>
                         </p>
                     </div>
 
-                    <!-- 4 & 5. Statistik Ringkas (Jumlah Armada & Jumlah Stasiun) -->
                     <div class="grid grid-cols-2 gap-4 relative z-10">
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-sky-50 text-[#2B9BFB] flex items-center justify-center font-bold">
@@ -292,7 +313,7 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                             </div>
                             <div>
                                 <span class="text-[10px] font-bold text-slate-400 uppercase block">Total Armada Dinas</span>
-                                <span class="text-base font-extrabold text-[#0F172A]">4 Unit Aktif</span>
+                                <span class="text-base font-extrabold text-[#0F172A]"><?= count($data['kereta_berdinas']) ?> Unit</span>
                             </div>
                         </div>
 
@@ -307,7 +328,6 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                         </div>
                     </div>
 
-                    <!-- 6. Rute Koridor (Garis Linier Stasiun Terdaftar) -->
                     <div class="space-y-3 relative z-10 pt-2">
                         <h5 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Linier Rute Perjalanan</h5>
                         <div class="p-6 bg-slate-50/80 rounded-3xl border border-slate-200/60 space-y-4 relative pl-8 before:absolute before:left-5 before:top-4 before:bottom-4 before:w-0.5 before:bg-[#8C6239]">
@@ -326,21 +346,15 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                     </div>
                 </div>
 
-                <!-- BAGIAN BAWAH (FOOTER - Otomatis Menempel di Bawah Halaman A4) -->
                 <div class="pt-4 border-t border-slate-100 flex justify-between items-center text-[11px] text-slate-400 mt-8 relative z-10">
                     <span>Dokumen ini digenerate otomatis oleh Sistem Manajemen ANVO.</span>
                     <span class="font-bold text-slate-600">CONFIDENTIAL</span>
                 </div>
-
             </div>
 
-            <!-- 3 TOMBOL AKSI: SIMPAN PDF, CETAK, DAN TUTUP -->
             <div id="modal-action-buttons" class="flex flex-col sm:flex-row gap-3 pt-2">
-                <button onclick="downloadPDF()" class="flex-1 bg-[#8C6239] hover:bg-[#74502e] text-white py-3.5 rounded-2xl font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-pdf"></i> Simpan PDF (Otomatis)
-                </button>
-                <button onclick="printDocument()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-2xl font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-print"></i> Cetak Dokumen
+                <button onclick="window.print()" class="flex-1 bg-[#8C6239] hover:bg-[#74502e] text-white py-3.5 rounded-2xl font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
                 </button>
                 <button onclick="closeModal('modal-peta-rute')" class="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-2xl font-semibold text-xs transition-all">
                     Tutup
@@ -349,42 +363,24 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
         </div>
     </div>
 
-    <!-- CSS Cetak Profesional A4 (Flexbox untuk kunci Footer di bawah & Logo Proporsional) -->
     <style>
         #print-area-map {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 275mm; /* Tinggi standar halaman A4 */
+            min-height: 275mm;
             box-sizing: border-box;
         }
-
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area-map, #print-area-map * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            #print-area-map, #print-area-map * { visibility: visible; }
             #print-area-map {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 210mm !important;
-                min-height: 297mm !important;
-                margin: 0 !important;
-                padding: 15mm 20mm !important;
-                box-shadow: none !important;
-                border: none !important;
-                background: white !important;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
+                position: absolute; left: 0; top: 0; width: 210mm !important; min-height: 297mm !important;
+                margin: 0 !important; padding: 15mm 20mm !important; box-shadow: none !important; border: none !important; background: white !important;
             }
         }
     </style>
 
-    <!-- Script Global & Handler Cetak Dokumen A4 Resmi -->
     <script>
         setTimeout(() => { const el = document.getElementById('flash-alert'); if(el) el.remove(); }, 3000);
 
@@ -394,16 +390,10 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
             const icon = document.getElementById('toast-icon');
 
             msg.innerText = message;
-            if(isError) {
-                icon.className = 'fa-solid fa-triangle-exclamation text-rose-400 text-sm';
-            } else {
-                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-sm';
-            }
+            icon.className = isError ? 'fa-solid fa-triangle-exclamation text-rose-400 text-sm' : 'fa-solid fa-circle-check text-emerald-400 text-sm';
 
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
         }
 
         const stasiunTersedia = <?= json_encode($data['stasiun_tersedia']) ?>;
@@ -447,8 +437,7 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 }
             }
 
-            const rows = container.querySelectorAll('.stasiun-row');
-            rows.forEach((r, idx) => {
+            container.querySelectorAll('.stasiun-row').forEach((r, idx) => {
                 r.querySelector('.nomor-urut').innerText = idx + 1;
             });
 
@@ -465,7 +454,8 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                 });
             });
 
-            fetch('/anvo/public/route/simpan_urutan', {
+            // Diperbarui ke jalur admin
+            fetch('/anvo/public/admin/route/simpan_urutan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ urutan: dataUrutan })
@@ -479,21 +469,7 @@ $idKoridor = $data['koridor']['id_koridor'] ?? '';
                     showToast(data.message, true);
                 }
             })
-            .catch(error => {
-                showToast('Terjadi kesalahan jaringan.', true);
-            });
-        }
-
-        // Fungsi Cetak & Simpan PDF Profesional via Dialog Browser (Hasil 100% Identik & Tajam)
-        function printDocument() {
-            window.print();
-        }
-
-        function downloadPDF() {
-            showToast('Silakan pilih "Save as PDF" pada menu cetak untuk menyimpan dokumen.');
-            setTimeout(() => {
-                window.print();
-            }, 1000);
+            .catch(() => showToast('Terjadi kesalahan jaringan.', true));
         }
     </script>
 

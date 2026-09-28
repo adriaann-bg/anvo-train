@@ -7,7 +7,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     <div class="flex-1 flex flex-col min-w-0">
         <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
-                <a href="/anvo/public/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
+                <a href="/anvo/public/admin/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
@@ -18,12 +18,10 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
         </header>
 
         <main class="flex-1 p-8 lg:p-10 overflow-y-auto">
-            <form id="form-jadwal" action="/anvo/public/jadwal/tambah" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <form id="form-jadwal" action="/anvo/public/admin/jadwal/tambah" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
-                <!-- INPUT HIDDEN UNTUK MENAMPUNG JSON TRANSIT BERISI WAKTU -->
                 <input type="hidden" name="stasiun_transit" id="input-transit-json">
 
-                <!-- KOLOM KIRI: Form Dasar -->
                 <div class="lg:col-span-4 space-y-6">
                     <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm space-y-4">
                         <h2 class="font-bold text-[#0F172A] border-b border-slate-100 pb-3">Informasi Dasar</h2>
@@ -83,7 +81,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: UI Peta Transit Interaktif & Input Jam -->
                 <div class="lg:col-span-8 space-y-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm min-h-[400px]">
                         <div class="flex justify-between items-end mb-8">
@@ -96,15 +93,11 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                             </button>
                         </div>
 
-                        <!-- Area Peta Interaktif -->
                         <div id="transit-map-container" class="hidden">
                             <div class="w-full overflow-x-auto custom-scrollbar pb-12 pt-4">
-                                <div id="transit-line" class="flex items-center min-w-max px-4">
-                                    <!-- Node Stasiun dirender dinamis via JS -->
-                                </div>
+                                <div id="transit-line" class="flex items-center min-w-max px-4"></div>
                             </div>
                             
-                            <!-- Hidden input pendukung rute asal & tujuan utama -->
                             <input type="hidden" name="stasiun_asal" id="input-asal">
                             <input type="hidden" name="stasiun_tujuan" id="input-tujuan">
                         </div>
@@ -116,7 +109,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="/anvo/public/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal</a>
+                        <a href="/anvo/public/admin/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal</a>
                         <button type="submit" class="px-8 py-3.5 bg-[#0F172A] hover:bg-[#8C6239] text-white rounded-2xl font-semibold text-sm transition-all shadow-md">
                             Simpan Jadwal Operasional
                         </button>
@@ -180,7 +173,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 return;
             }
 
-            fetch('/anvo/public/jadwal/get_kereta_ajax/' + idKoridor)
+            fetch('/anvo/public/admin/jadwal/get_kereta_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
                     selectArmada.innerHTML = '<option value="">-- Pilih Armada --</option>';
@@ -194,7 +187,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     selectArmada.disabled = false;
                 });
 
-            fetch('/anvo/public/jadwal/get_stasiun_ajax/' + idKoridor)
+            fetch('/anvo/public/admin/jadwal/get_stasiun_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
                     currentStations = data; 

@@ -29,23 +29,24 @@
     </div>
 </section>
 
-<!-- 2. Form Beli Tiket (Custom Dropdown WA Web Style) -->
+<!-- 2. Form Beli Tiket -->
 <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20 mb-24">
     <div class="bg-white rounded-[32px] shadow-2xl p-8 border border-gray-100">
         <h2 class="text-2xl font-bold text-center text-[#0F172A] mb-8">Beli Tiket</h2>
         
-        <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+        <!-- Tambahkan onsubmit untuk validasi wajib isi & tanggal kembali opsional -->
+        <form action="/anvo/public/booking/jadwal" method="GET" onsubmit="return validateSearchForm()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
             
-            <!-- Keberangkatan (Dropdown Search) -->
+            <!-- Keberangkatan (Asal) -->
             <div class="relative custom-dropdown" data-target="asal">
-                <label class="text-sm text-gray-500 mb-2 block">Keberangkatan</label>
+                <label class="text-sm text-gray-500 mb-2 block">Keberangkatan <span class="text-red-500">*</span></label>
                 <div class="border-b border-gray-300 py-2 flex justify-between items-center cursor-pointer hover:border-[#8C6239] transition-colors" onclick="toggleDropdown('dropdown-asal')">
-                    <span id="label-asal" class="text-[#0F172A]">Kota Asal</span>
+                    <span id="label-asal" class="text-gray-400">Pilih Kota Asal</span>
                     <svg class="w-4 h-4 text-gray-400 dropdown-arrow transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <input type="hidden" name="stasiun_asal" id="input-asal">
+                <!-- Name disesuaikan dengan Controller: 'asal' -->
+                <input type="hidden" name="asal" id="input-asal">
                 
-                <!-- Panel Dropdown -->
                 <div id="dropdown-asal" class="hidden absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
                     <div class="p-3 bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
                         <div class="relative">
@@ -56,7 +57,7 @@
                     <ul id="list-asal" class="max-h-48 overflow-y-auto">
                         <?php foreach($stasiuns as $stasiun): ?>
                         <li class="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-50 last:border-0" 
-                            onclick="selectOption('asal', '<?= $stasiun['nama_stasiun'] ?>', '<?= $stasiun['id_stasiun'] ?>')">
+                            onclick="selectOption('asal', '<?= $stasiun['nama_stasiun'] ?>', '<?= $stasiun['nama_stasiun'] ?>')">
                             <?= $stasiun['nama_stasiun'] ?>
                         </li>
                         <?php endforeach; ?>
@@ -64,14 +65,15 @@
                 </div>
             </div>
 
-            <!-- Tujuan (Dropdown Search) -->
+            <!-- Tujuan -->
             <div class="relative custom-dropdown" data-target="tujuan">
-                <label class="text-sm text-gray-500 mb-2 block">Tujuan</label>
+                <label class="text-sm text-gray-500 mb-2 block">Tujuan <span class="text-red-500">*</span></label>
                 <div class="border-b border-gray-300 py-2 flex justify-between items-center cursor-pointer hover:border-[#8C6239] transition-colors" onclick="toggleDropdown('dropdown-tujuan')">
-                    <span id="label-tujuan" class="text-[#0F172A]">Kota Tujuan</span>
+                    <span id="label-tujuan" class="text-gray-400">Pilih Kota Tujuan</span>
                     <svg class="w-4 h-4 text-gray-400 dropdown-arrow transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <input type="hidden" name="stasiun_tujuan" id="input-tujuan">
+                <!-- Name disesuaikan dengan Controller: 'tujuan' -->
+                <input type="hidden" name="tujuan" id="input-tujuan">
                 
                 <div id="dropdown-tujuan" class="hidden absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
                     <div class="p-3 bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
@@ -83,7 +85,7 @@
                     <ul id="list-tujuan" class="max-h-48 overflow-y-auto">
                         <?php foreach($stasiuns as $stasiun): ?>
                         <li class="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-50 last:border-0" 
-                            onclick="selectOption('tujuan', '<?= $stasiun['nama_stasiun'] ?>', '<?= $stasiun['id_stasiun'] ?>')">
+                            onclick="selectOption('tujuan', '<?= $stasiun['nama_stasiun'] ?>', '<?= $stasiun['nama_stasiun'] ?>')">
                             <?= $stasiun['nama_stasiun'] ?>
                         </li>
                         <?php endforeach; ?>
@@ -93,11 +95,12 @@
 
             <!-- Tanggal Berangkat -->
             <div class="flex flex-col">
-                <label class="text-sm text-gray-500 mb-2">Tanggal Berangkat</label>
-                <input type="date" class="border-b border-gray-300 py-2 focus:outline-none focus:border-[#8C6239] bg-transparent text-[#0F172A]">
+                <label class="text-sm text-gray-500 mb-2">Tanggal Berangkat <span class="text-red-500">*</span></label>
+                <!-- Name disesuaikan: 'tanggal' -->
+                <input type="date" name="tanggal" id="input-tanggal" value="<?= date('Y-m-d') ?>" class="border-b border-gray-300 py-2 focus:outline-none focus:border-[#8C6239] bg-transparent text-[#0F172A]">
             </div>
             
-            <!-- Tanggal Kembali -->
+            <!-- Tanggal Kembali (Opsional via Switch) -->
             <div class="flex flex-col">
                 <div class="flex justify-between items-center mb-2">
                     <label class="text-sm text-gray-500">Tanggal Kembali</label>
@@ -106,17 +109,19 @@
                         <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#8C6239]"></div>
                     </label>
                 </div>
-                <input type="date" id="input-pulang" disabled class="border-b border-gray-300 py-2 focus:outline-none focus:border-[#8C6239] bg-transparent opacity-50 cursor-not-allowed">
+                <!-- Name disesuaikan: 'tanggal_pulang' -->
+                <input type="date" name="tanggal_pulang" id="input-pulang" disabled class="border-b border-gray-300 py-2 focus:outline-none focus:border-[#8C6239] bg-transparent opacity-50 cursor-not-allowed">
             </div>
 
-            <!-- Penumpang (Dropdown No Search) -->
+            <!-- Penumpang -->
             <div class="relative custom-dropdown" data-target="penumpang">
-                <label class="text-sm text-gray-500 mb-2 block">Penumpang</label>
+                <label class="text-sm text-gray-500 mb-2 block">Penumpang <span class="text-red-500">*</span></label>
                 <div class="border-b border-gray-300 py-2 flex justify-between items-center cursor-pointer hover:border-[#8C6239] transition-colors" onclick="toggleDropdown('dropdown-penumpang')">
-                    <span id="label-penumpang" class="text-[#0F172A]">Pilih Jumlah</span>
+                    <span id="label-penumpang" class="text-gray-400">Pilih Jumlah</span>
                     <svg class="w-4 h-4 text-gray-400 dropdown-arrow transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <input type="hidden" name="jumlah_penumpang" id="input-penumpang">
+                <!-- Name disesuaikan: 'penumpang' -->
+                <input type="hidden" name="penumpang" id="input-penumpang">
                 
                 <div id="dropdown-penumpang" class="hidden absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
                     <ul class="max-h-48 overflow-y-auto py-2">
@@ -127,14 +132,15 @@
                 </div>
             </div>
 
-            <!-- Kelas (Dropdown No Search) -->
+            <!-- Kelas -->
             <div class="relative custom-dropdown" data-target="kelas">
-                <label class="text-sm text-gray-500 mb-2 block">Kelas Armada</label>
+                <label class="text-sm text-gray-500 mb-2 block">Kelas Armada <span class="text-red-500">*</span></label>
                 <div class="border-b border-gray-300 py-2 flex justify-between items-center cursor-pointer hover:border-[#8C6239] transition-colors" onclick="toggleDropdown('dropdown-kelas')">
-                    <span id="label-kelas" class="text-[#0F172A]">Pilih Kelas</span>
+                    <span id="label-kelas" class="text-gray-400">Pilih Kelas</span>
                     <svg class="w-4 h-4 text-gray-400 dropdown-arrow transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <input type="hidden" name="kelas_kereta" id="input-kelas">
+                <!-- Name disesuaikan: 'kelas' -->
+                <input type="hidden" name="kelas" id="input-kelas">
                 
                 <div id="dropdown-kelas" class="hidden absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
                     <ul class="max-h-48 overflow-y-auto py-2">
@@ -147,17 +153,17 @@
                     </ul>
                 </div>
             </div>
-        </form>
 
-        <div class="flex flex-col md:flex-row justify-between items-center mt-8 border-t border-gray-100 pt-6">
-            <p class="text-xs text-orange-500 flex items-center gap-2 mb-6 md:mb-0">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                Penumpang anak di atas 3 tahun wajib membeli tiket sendiri.
-            </p>
-            <button class="w-full md:w-auto bg-transparent border border-[#0F172A] text-[#0F172A] px-10 py-3 rounded-full font-medium hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] transition-all duration-300">
-                Cari Tiket
-            </button>
-        </div>
+            <div class="flex flex-col md:flex-row justify-between items-center md:col-span-2 lg:col-span-3 mt-4 border-t border-gray-100 pt-6 w-full">
+                <p class="text-xs text-orange-500 flex items-center gap-2 mb-6 md:mb-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    Penumpang anak di atas 3 tahun wajib membeli tiket sendiri.
+                </p>
+                <button type="submit" class="w-full md:w-auto bg-transparent border border-[#0F172A] text-[#0F172A] px-10 py-3 rounded-full font-medium hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-[#8C6239] hover:to-[#AF8B69] transition-all duration-300">
+                    Cari Tiket
+                </button>
+            </div>
+        </form>
     </div>
 </section>
 
@@ -391,12 +397,14 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
 </style>
 <script>
+    
     // 1. Logika Switch Tanggal Pulang
     document.getElementById('toggle-pulang').addEventListener('change', function() {
         const input = document.getElementById('input-pulang');
         if(this.checked) {
             input.disabled = false;
             input.classList.remove('opacity-50', 'cursor-not-allowed');
+            input.value = new Date().toISOString().split('T')[0]; // Set default hari ini jika dicentang
         } else {
             input.disabled = true;
             input.classList.add('opacity-50', 'cursor-not-allowed');
@@ -404,45 +412,80 @@
         }
     });
 
-    // 2. Logika Custom Dropdown (Mirip WA Web)
+    // 2. Validasi Sebelum Form Dikirim (Wajib Semua, Tanggal Kembali Opsional Sesuai Toggle)
+    function validateSearchForm() {
+        const asal = document.getElementById('input-asal').value;
+        const tujuan = document.getElementById('input-tujuan').value;
+        const tanggal = document.getElementById('input-tanggal').value;
+        const isPulangActive = document.getElementById('toggle-pulang').checked;
+        const tanggalPulang = document.getElementById('input-pulang').value;
+        const penumpang = document.getElementById('input-penumpang').value;
+        const kelas = document.getElementById('input-kelas').value;
+
+        if (!asal) {
+            alert('Mohon pilih kota keberangkatan terlebih dahulu.');
+            return false;
+        }
+        if (!tujuan) {
+            alert('Mohon pilih kota tujuan terlebih dahulu.');
+            return false;
+        }
+        if (asal === tujuan) {
+            alert('Kota keberangkatan dan kota tujuan tidak boleh sama!');
+            return false;
+        }
+        if (!tanggal) {
+            alert('Mohon tentukan tanggal keberangkatan.');
+            return false;
+        }
+        // Jika switch pulang aktif, tanggal kembali wajib diisi
+        if (isPulangActive && !tanggalPulang) {
+            alert('Mohon tentukan tanggal kembali karena opsi pulang aktif.');
+            return false;
+        }
+        if (!penumpang) {
+            alert('Mohon pilih jumlah penumpang.');
+            return false;
+        }
+        if (!kelas) {
+            alert('Mohon pilih kelas armada.');
+            return false;
+        }
+        return true;
+    }
+
+    // 3. Logika Custom Dropdown
     function toggleDropdown(id) {
-        // Tutup semua dropdown lain yang sedang terbuka
         document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
             if(el.id !== id) {
                 el.classList.add('hidden');
-                // Putar panah kembali
                 el.parentElement.querySelector('.dropdown-arrow').classList.remove('rotate-180');
             }
         });
         
-        // Buka/Tutup dropdown yang diklik
         const dropdown = document.getElementById(id);
         const arrow = dropdown.parentElement.querySelector('.dropdown-arrow');
         dropdown.classList.toggle('hidden');
         arrow.classList.toggle('rotate-180');
         
-        // Fokuskan ke input pencarian jika ada
         const searchInput = dropdown.querySelector('input[type="text"]');
         if(searchInput && !dropdown.classList.contains('hidden')) {
             searchInput.focus();
         }
     }
 
-    // 3. Logika Memilih Opsi di Dropdown
+    // 4. Logika Memilih Opsi di Dropdown
     function selectOption(target, labelText, value) {
-        // Ubah Teks Label
         const label = document.getElementById('label-' + target);
         label.innerText = labelText;
-        label.classList.add('font-medium'); // Beri sedikit ketebalan jika sudah dipilih
+        label.classList.remove('text-gray-400');
+        label.classList.add('text-[#0F172A]', 'font-medium');
         
-        // Isi nilai input hidden untuk form submit ke PHP nanti
         document.getElementById('input-' + target).value = value;
-        
-        // Tutup Dropdown
         toggleDropdown('dropdown-' + target);
     }
 
-    // 4. Logika Pencarian/Filter Data Dropdown
+    // 5. Logika Pencarian/Filter Data Dropdown
     function filterDropdown(input, listId) {
         const filter = input.value.toUpperCase();
         const ul = document.getElementById(listId);
@@ -458,7 +501,7 @@
         }
     }
 
-    // 5. Tutup dropdown jika klik di luar area
+    // 6. Tutup dropdown jika klik di luar area
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.custom-dropdown')) {
             document.querySelectorAll('[id^="dropdown-"]').forEach(el => {

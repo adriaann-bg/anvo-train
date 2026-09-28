@@ -60,33 +60,33 @@ if(isset($_SESSION['user_id'])) {
 
         <!-- Tengah: Desktop Menu Dinamis Berdasarkan Role -->
         <!-- Tengah: Desktop Menu (Seragam untuk User & Admin tanpa ikon) -->
+        <!-- Tengah: Desktop Menu -->
         <div class="hidden md:flex space-x-10 h-full items-center absolute left-1/2 -translate-x-1/2 z-0">
-
             <a href="/anvo/public/" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
                 Beranda
                 <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
             </a>
 
-            <a href="/anvo/public/jadwal" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+            <!-- DIUBAH: Mengarah ke Halaman Utama Pemesanan User -->
+            <a href="/anvo/public/booking" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
                 Beli Tiket
                 <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
             </a>
 
             <?php if(isset($_SESSION['user_id'])): ?>
-            <a href="/anvo/public/tiket" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
+            <!-- DIUBAH: Mengarah ke Histori & Tiket Saya -->
+            <a href="/anvo/public/booking/tiket_saya" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
                 Tiket Saya
                 <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
             </a>
             <?php endif; ?>
 
-            <!-- Menu Tambahan Khusus Admin dengan Format yang Sama Persis -->
             <?php if(isset($userDataSession) && $userDataSession['role'] === 'admin'): ?>
             <a href="/anvo/public/admin" class="relative h-full flex items-center text-[#0F172A] font-normal hover:text-[#8C6239] transition-colors group">
                 Dashboard Admin
                 <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[4px] bg-[#8C6239] rounded-t-[16px] scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-300"></span>
             </a>
             <?php endif; ?>
-
         </div>
 
         <!-- Kanan: Desktop Auth Button & Profile -->
@@ -152,7 +152,7 @@ if(isset($_SESSION['user_id'])) {
 
         <!-- Menu Utama -->
         <a href="/anvo/public/" class="text-white text-lg font-medium">Beranda</a>
-        <a href="/anvo/public/jadwal" class="text-slate-400 text-lg hover:text-white transition-colors">Beli Tiket</a>
+        <a href="/anvo/public/admin/jadwal" class="text-slate-400 text-lg hover:text-white transition-colors">Beli Tiket</a>
         
         <?php if(isset($_SESSION['user_id'])): ?>
             <!-- Menu Khusus Member -->
@@ -176,7 +176,7 @@ if(isset($_SESSION['user_id'])) {
             </svg>
         </button>
         <a href="/anvo/public/" class="text-white text-2xl font-medium">Beranda</a>
-        <a href="/anvo/public/jadwal" class="text-slate-400 text-2xl hover:text-white transition-colors">Beli Tiket</a>
+        <a href="/anvo/public/admin/jadwal" class="text-slate-400 text-2xl hover:text-white transition-colors">Beli Tiket</a>
         <a href="/anvo/public/tiket" class="text-slate-400 text-2xl hover:text-white transition-colors">Tiket Saya</a>
         <a href="/anvo/public/auth/login" class="bg-gradient-to-r from-[#8C6239] to-[#AF8B69] text-white px-8 py-3 rounded-full text-xl mt-4">Mulai</a>
     </div>
@@ -189,11 +189,12 @@ if(isset($_SESSION['user_id'])) {
             </svg>
         </button>
         <a href="/anvo/public/" class="text-white text-2xl font-medium">Beranda</a>
-        <a href="/anvo/public/jadwal" class="text-slate-400 text-2xl hover:text-white transition-colors">Beli Tiket</a>
+        <a href="/anvo/public/admin/jadwal" class="text-slate-400 text-2xl hover:text-white transition-colors">Beli Tiket</a>
         <a href="/anvo/public/auth/login" class="bg-gradient-to-r from-[#8C6239] to-[#AF8B69] text-white px-8 py-3 rounded-full text-xl mt-4">Mulai</a>
     </div>
 
-    <main class="flex-grow">
+    <!-- Cari baris ini di views/layouts/header.php -->
+    <main class="flex-grow pt-16 md:pt-20">
 
     <?php if (isset($_SESSION['success'])): ?>
         <div id="toast-success" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex items-center w-full max-w-md p-4 text-gray-700 bg-white rounded-2xl shadow-2xl border-l-4 border-emerald-500 transition-all duration-500">

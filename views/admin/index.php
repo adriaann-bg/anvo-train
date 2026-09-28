@@ -64,7 +64,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-4">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Armada Kereta</span>
-                        <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-50 flex items-center justify-center font-bold">
                             <i class="fa-solid fa-gauge-high"></i>
                         </div>
                     </div>
@@ -107,11 +107,11 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     <div class="lg:col-span-2 grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Awal</label>
-                            <input type="date" id="start_date" name="start_date" value="<?= $data['filter']['start_date'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                            <input type="date" id="start_date" name="start_date" value="<?= htmlspecialchars($data['filter']['start_date']) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Tanggal Akhir (Maks 30 Hari)</label>
-                            <input type="date" id="end_date" name="end_date" value="<?= $data['filter']['end_date'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                            <input type="date" id="end_date" name="end_date" value="<?= htmlspecialchars($data['filter']['end_date']) ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                         </div>
                     </div>
                     <div class="lg:col-span-1">
@@ -128,7 +128,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <select id="filter-asal" name="asal" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                             <option value="">Semua Asal</option>
                             <?php foreach($data['stasiun'] as $s): ?>
-                                <option value="<?= $s['nama_stasiun'] ?>" <?= ($data['filter']['asal'] == $s['nama_stasiun']) ? 'selected' : '' ?>><?= explode(' - ', $s['nama_stasiun'])[0] ?></option>
+                                <option value="<?= htmlspecialchars($s['nama_stasiun']) ?>" <?= ($data['filter']['asal'] == $s['nama_stasiun']) ? 'selected' : '' ?>><?= htmlspecialchars(explode(' - ', $s['nama_stasiun'])[0]) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -137,7 +137,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <select id="filter-tujuan" name="tujuan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                             <option value="">Semua Tujuan</option>
                             <?php foreach($data['stasiun'] as $s): ?>
-                                <option value="<?= $s['nama_stasiun'] ?>" <?= ($data['filter']['tujuan'] == $s['nama_stasiun']) ? 'selected' : '' ?>><?= explode(' - ', $s['nama_stasiun'])[0] ?></option>
+                                <option value="<?= htmlspecialchars($s['nama_stasiun']) ?>" <?= ($data['filter']['tujuan'] == $s['nama_stasiun']) ? 'selected' : '' ?>><?= htmlspecialchars(explode(' - ', $s['nama_stasiun'])[0]) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -179,11 +179,10 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                     $totalPenumpang = count($penumpangList);
                                     $modalId = "modal-detail-" . $op['id_jadwal'] . "-" . $op['tanggal_operasional'];
                                     
-                                    // Raw timestamp untuk pengurutan DataTables yang akurat (TahunBulanTanggalJam)
+                                    // Raw timestamp untuk pengurutan DataTables yang akurat
                                     $rawSortDate = date('Y-m-d H:i:s', strtotime($op['tanggal_operasional'] . ' ' . $op['jam_berangkat']));
                                 ?>
                                     <tr class="hover:bg-slate-50/60 transition-colors">
-                                        <!-- Perhatikan atribut data-sort disini untuk mencegah error sorting DataTables -->
                                         <td class="py-4 px-4 font-bold text-[#8C6239] whitespace-nowrap" data-sort="<?= $rawSortDate ?>">
                                             <i class="fa-regular fa-calendar-check mr-1.5"></i> <?= date('d M Y', strtotime($op['tanggal_operasional'])) ?>
                                         </td>
@@ -191,14 +190,17 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <span class="block font-bold text-[#0F172A]"><?= htmlspecialchars($op['nama_kereta']) ?></span>
                                             <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-2 py-0.5 rounded-lg font-bold mt-1 inline-block"><?= htmlspecialchars($op['jenis_kelas']) ?></span>
                                         </td>
-                                        <td class="py-4 px-4 font-semibold text-slate-700"><?= htmlspecialchars($op['stasiun_asal']) ?> <span class="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded ml-1 font-bold"><?= $op['jam_berangkat'] ?></span></td>
-                                        <td class="py-4 px-4 font-semibold text-slate-700"><?= htmlspecialchars($op['stasiun_tujuan']) ?> <span class="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded ml-1 font-bold"><?= $op['jam_tiba'] ?></span></td>
+                                        <td class="py-4 px-4 font-semibold text-slate-700"><?= htmlspecialchars($op['stasiun_asal']) ?> <span class="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded ml-1 font-bold"><?= htmlspecialchars($op['jam_berangkat']) ?></span></td>
+                                        <td class="py-4 px-4 font-semibold text-slate-700"><?= htmlspecialchars($op['stasiun_tujuan']) ?> <span class="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded ml-1 font-bold"><?= htmlspecialchars($op['jam_tiba']) ?></span></td>
                                         <td class="py-4 px-4 text-center font-bold <?= $totalPenumpang > 0 ? 'text-purple-600' : 'text-slate-400' ?>"><?= $totalPenumpang ?> Penumpang</td>
                                         <td class="py-4 px-4 text-center font-bold <?= $totalKru > 0 ? 'text-emerald-600' : 'text-slate-400' ?>"><?= $totalKru ?> Kru</td>
                                         
-                                        <!-- KOLOM AKSI DIPERBARUI DENGAN TOMBOL PENCARIAN -->
+                                        <!-- KOLOM 7: TOMBOL AKSI -->
                                         <td class="py-4 px-4 text-center">
                                             <div class="flex flex-col gap-1.5">
+                                                <button onclick="openModal('modal-detail-jadwal-op-<?= $op['id_jadwal'] . '-' . $op['tanggal_operasional'] ?>')" class="px-3 py-1.5 bg-[#0F172A] text-white hover:bg-[#8C6239] rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                                    <i class="fa-solid fa-train"></i> Detail & Kursi
+                                                </button>
                                                 <button onclick="openModal('<?= $modalId ?>')" class="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-[#0F172A] hover:text-white rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-1.5">
                                                     <i class="fa-solid fa-file-lines"></i> Cek Dokumen
                                                 </button>
@@ -222,15 +224,148 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
         </main>
     </div>
 
-    <!-- SEMUA MODAL DETAIL DOKUMEN RESMI A4 & MODAL PENCARIAN -->
+    <!-- SEMUA MODAL DITEMPATKAN DI SINI (DILUAR TABLE) -->
     <?php if(!empty($data['daily_operations'])): ?>
         <?php foreach($data['daily_operations'] as $op): 
             $modalId = "modal-detail-" . $op['id_jadwal'] . "-" . $op['tanggal_operasional'];
+            $modalDetailOpId = "modal-detail-jadwal-op-" . $op['id_jadwal'] . "-" . $op['tanggal_operasional'];
+            
             $kruList = $op['kru_list'];
             $penumpangList = $op['penumpang_list'];
+            
+            $koridorStasiun = $op['koridor_stasiun'] ?? [];
+            $kelasKapasitas = $op['kelas_kapasitas'] ?? [];
+            $totalKapasitasKereta = array_sum($kelasKapasitas);
+            $jumlahPenumpangTotal = count($penumpangList);
         ?>
             
-            <!-- 1. MODAL DOKUMEN RESMI A4 -->
+            <!-- 1. MODAL DETAIL RUTE, TRANSIT, & SISA KURSI PER KELAS -->
+            <div id="<?= $modalDetailOpId ?>" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+                <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl animate-fade-in relative rounded-[2rem] p-8 text-left space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 class="font-extrabold text-lg text-[#0F172A] flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info text-[#8C6239]"></i> Detail Operasional & Status Kursi
+                            </h3>
+                            <span class="text-xs text-slate-400 font-medium"><?= htmlspecialchars($op['nama_kereta']) ?> &bull; Tanggal: <?= date('d M Y', strtotime($op['tanggal_operasional'])) ?></span>
+                        </div>
+                        <button onclick="closeModal('<?= $modalDetailOpId ?>')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <!-- Informasi Jalur & Stasiun (Transit vs Dilewati Lengkap dengan Jam) -->
+                    <div>
+                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">Jalur Koridor & Titik Pemberhentian</h4>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-4">
+                            
+                            <!-- Stasiun Transit / Pemberhentian -->
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 block mb-2 uppercase tracking-wider">Stasiun Transit & Pemberhentian:</span>
+                                <div class="space-y-2">
+                                    <?php if(!empty($op['stopping_stations'])): ?>
+                                        <?php foreach($op['stopping_stations'] as $stop): 
+                                            $badgeStyle = 'bg-slate-100 text-slate-600';
+                                            $statusLower = strtolower($stop['status']);
+                                            if(strpos($statusLower, 'berangkat') !== false) { $badgeStyle = 'bg-emerald-50 text-emerald-600'; }
+                                            elseif(strpos($statusLower, 'tiba') !== false) { $badgeStyle = 'bg-rose-50 text-rose-600'; }
+                                            else { $badgeStyle = 'bg-sky-50 text-[#2B9BFB]'; }
+                                        ?>
+                                            <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200/60 text-xs shadow-sm">
+                                                <div class="flex items-center gap-2">
+                                                    <i class="fa-solid fa-circle text-[6px] text-[#8C6239]"></i>
+                                                    <span class="font-bold text-[#0F172A]"><?= htmlspecialchars($stop['nama']) ?></span>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <?php if(!empty($stop['jam']) && $stop['jam'] !== '-'): ?>
+                                                        <span class="font-mono font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200 text-[11px]">
+                                                            <i class="fa-regular fa-clock mr-1 text-[#8C6239]"></i> <?= htmlspecialchars($stop['jam']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded <?= $badgeStyle ?>"><?= htmlspecialchars($stop['status']) ?></span>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="text-xs text-slate-400 italic">Tidak ada data perhentian.</div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <!-- Stasiun Langsung / Dilewati -->
+                            <?php if(!empty($op['passed_stations'])): ?>
+                                <div class="pt-3 border-t border-slate-200">
+                                    <span class="text-[10px] font-bold text-slate-400 block mb-2 uppercase tracking-wider">Langsung / Tidak Transit di Stasiun:</span>
+                                    <div class="space-y-2">
+                                        <?php foreach($op['passed_stations'] as $passed): ?>
+                                            <div class="flex justify-between items-center bg-white/60 p-2.5 rounded-xl border border-slate-200/40 text-xs">
+                                                <div class="flex items-center gap-2">
+                                                    <i class="fa-solid fa-train text-[10px] text-slate-400"></i>
+                                                    <span class="font-semibold text-slate-600"><?= htmlspecialchars($passed['nama']) ?></span>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    <?php if(!empty($passed['jam']) && $passed['jam'] !== '-'): ?>
+                                                        <span class="font-mono text-slate-400 text-[11px]">
+                                                            <i class="fa-regular fa-clock mr-1"></i> <?= htmlspecialchars($passed['jam']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+                                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500">Dilewati</span>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                        </div>
+                    </div>
+
+                    <!-- 2. Status Kursi & Sisa Kursi per Kelas -->
+                    <div>
+                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2.5">Ketersediaan & Sisa Kursi Per Kelas</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <?php if(empty($kelasKapasitas)): ?>
+                                <div class="col-span-2 text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-xl">Konfigurasi kelas gerbong belum diatur.</div>
+                            <?php else: ?>
+                                <?php foreach($kelasKapasitas as $namaKelas => $kapasitasTotal): ?>
+                                    <div class="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm flex flex-col justify-between space-y-2">
+                                        <div class="flex justify-between items-start">
+                                            <span class="text-xs font-bold text-[#0F172A]"><?= htmlspecialchars($namaKelas) ?></span>
+                                            <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-2 py-0.5 rounded font-bold">Aktif</span>
+                                        </div>
+                                        <div class="flex justify-between items-end pt-2 border-t border-slate-100">
+                                            <div>
+                                                <span class="text-[10px] text-slate-400 block font-bold uppercase">Kapasitas Kursi</span>
+                                                <span class="text-sm font-extrabold text-slate-700"><?= $kapasitasTotal ?> Seat</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-[10px] text-emerald-500 block font-bold uppercase">Status</span>
+                                                <span class="text-xs font-extrabold text-emerald-600">Tersedia</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Total Manifes -->
+                    <div class="p-4 bg-slate-900 text-white rounded-2xl flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-bold uppercase">Total Kapasitas Rangkaian</span>
+                            <span class="text-lg font-extrabold text-[#2B9BFB]"><?= $totalKapasitasKereta ?> Kursi</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block font-bold uppercase">Total Penumpang Terdaftar</span>
+                            <span class="text-lg font-extrabold text-purple-400"><?= $jumlahPenumpangTotal ?> Penumpang</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="closeModal('<?= $modalDetailOpId ?>')" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-all">Tutup Pratinjau</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MODAL DOKUMEN RESMI A4 -->
             <div id="<?= $modalId ?>" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
                 <div id="dokumen-a4-<?= $modalId ?>" class="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl animate-fade-in relative rounded-xl text-left">
                     <div class="h-2 w-full bg-gradient-to-r from-[#8C6239] to-[#AF8B69] no-print"></div>
@@ -260,12 +395,12 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                     <div>
                                         <span class="block text-[10px] text-slate-400 font-bold uppercase">Stasiun Asal</span>
                                         <span class="block font-semibold text-slate-700 mt-0.5"><?= htmlspecialchars($op['stasiun_asal']) ?></span>
-                                        <span class="text-xs font-mono text-slate-500 font-bold">Pukul: <?= $op['jam_berangkat'] ?> WIB</span>
+                                        <span class="text-xs font-mono text-slate-500 font-bold">Pukul: <?= htmlspecialchars($op['jam_berangkat']) ?> WIB</span>
                                     </div>
                                     <div>
                                         <span class="block text-[10px] text-slate-400 font-bold uppercase">Stasiun Tujuan</span>
                                         <span class="block font-semibold text-slate-700 mt-0.5"><?= htmlspecialchars($op['stasiun_tujuan']) ?></span>
-                                        <span class="text-xs font-mono text-slate-500 font-bold">Pukul: <?= $op['jam_tiba'] ?> WIB</span>
+                                        <span class="text-xs font-mono text-slate-500 font-bold">Pukul: <?= htmlspecialchars($op['jam_tiba']) ?> WIB</span>
                                     </div>
                                 </div>
                             </div>
@@ -286,7 +421,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <?php if(empty($kruList)): ?>
                                                 <tr><td colspan="4" class="py-4 text-center text-slate-400 italic">Tidak ada kru terdaftar untuk tanggal ini.</td></tr>
                                             <?php else: ?>
-                                                <?php $kNo=1; foreach($kruList as$kru): ?>
+                                                <?php $kNo=1; foreach($kruList as $kru): ?>
                                                     <tr>
                                                         <td class="py-2.5 px-3 font-bold text-slate-500"><?= $kNo++ ?></td>
                                                         <td class="py-2.5 px-3 font-bold text-[#0F172A]"><?= htmlspecialchars($kru['nama_lengkap']) ?></td>
@@ -316,7 +451,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             <?php if(empty($penumpangList)): ?>
                                                 <tr><td colspan="4" class="py-4 text-center text-slate-400 italic">Tidak ada data penumpang untuk tanggal ini.</td></tr>
                                             <?php else: ?>
-                                                <?php $pNo=1; foreach($penumpangList as$p): ?>
+                                                <?php $pNo=1; foreach($penumpangList as $p): ?>
                                                     <tr>
                                                         <td class="py-2.5 px-3 font-bold text-slate-500"><?= $pNo++ ?></td>
                                                         <td class="py-2.5 px-3 font-bold text-[#0F172A]"><?= htmlspecialchars($p['nama']) ?></td>
@@ -345,13 +480,13 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 </div>
             </div>
 
-            <!-- 2. MODAL PENCARIAN PENUMPANG -->
+            <!-- 3. MODAL PENCARIAN PENUMPANG -->
             <div id="modal-cari-penumpang-<?= $modalId ?>" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
                 <div class="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl animate-fade-in relative text-left">
                     <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
                         <div>
                             <h3 class="font-extrabold text-lg text-[#0F172A]"><i class="fa-solid fa-user-magnifying-glass text-purple-600 mr-2"></i> Cari Penumpang</h3>
-                            <span class="text-[10px] text-slate-400 font-bold block mt-1"><?= date('d M Y', strtotime($op['tanggal_operasional'])) ?> | <?= $op['jam_berangkat'] ?> WIB</span>
+                            <span class="text-[10px] text-slate-400 font-bold block mt-1"><?= date('d M Y', strtotime($op['tanggal_operasional'])) ?> | <?= htmlspecialchars($op['jam_berangkat']) ?> WIB</span>
                         </div>
                         <button onclick="closeModal('modal-cari-penumpang-<?= $modalId ?>')" class="text-slate-400 hover:text-rose-500 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                     </div>
@@ -379,13 +514,13 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 </div>
             </div>
 
-            <!-- 3. MODAL PENCARIAN KRU -->
+            <!-- 4. MODAL PENCARIAN KRU -->
             <div id="modal-cari-kru-<?= $modalId ?>" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
                 <div class="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl animate-fade-in relative text-left">
                     <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
                         <div>
                             <h3 class="font-extrabold text-lg text-[#0F172A]"><i class="fa-solid fa-user-shield text-emerald-600 mr-2"></i> Cari Kru Bertugas</h3>
-                            <span class="text-[10px] text-slate-400 font-bold block mt-1"><?= date('d M Y', strtotime($op['tanggal_operasional'])) ?> | <?= $op['jam_berangkat'] ?> WIB</span>
+                            <span class="text-[10px] text-slate-400 font-bold block mt-1"><?= date('d M Y', strtotime($op['tanggal_operasional'])) ?> | <?= htmlspecialchars($op['jam_berangkat']) ?> WIB</span>
                         </div>
                         <button onclick="closeModal('modal-cari-kru-<?= $modalId ?>')" class="text-slate-400 hover:text-rose-500 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                     </div>
@@ -443,7 +578,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
         startInput.addEventListener('change', enforceDateLimits);
         endInput.addEventListener('change', enforceDateLimits);
-        enforceDateLimits(); // Panggil saat form pertama dimuat
+        enforceDateLimits(); 
 
         setTimeout(function() {
             const alertBox = document.getElementById('flash-alert');
@@ -462,7 +597,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             const modal = document.getElementById(id);
             if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
             
-            // Reset input pencarian saat modal ditutup
             if(id.startsWith('modal-cari-')) {
                 const input = modal.querySelector('input[type="text"]');
                 if(input) {
@@ -472,7 +606,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             }
         }
 
-        // Fungsi Live Search Javascript (Sangat Ringan, Langsung Eksekusi Tanpa Reload)
         function filterLiveSearch(inputElement, listId) {
             const filter = inputElement.value.toLowerCase();
             const list = document.getElementById(listId);
@@ -494,7 +627,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
         $(document).ready(function() {
             $('#dataTable').DataTable({
-                // Perbaikan Sorting: Mencegah DataTables mengurutkan sendiri di awal, membiarkan PHP yang mengatur urutan asli
                 "order": [], 
                 "language": {
                     "lengthMenu": "Tampilkan _MENU_ data per halaman",
@@ -510,7 +642,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             });
         });
 
-        // Cetak Dokumen dengan ID Modal Unik
         function cetakDokumenJadwal(modalId) {
             const konten = document.getElementById('dokumen-a4-' + modalId).innerHTML;
             
@@ -554,6 +685,4 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
         }
     </script>
 
-<?php 
-require_once __DIR__ . '/../layouts/admin/footer.php'; 
-?>
+<?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>

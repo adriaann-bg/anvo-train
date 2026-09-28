@@ -3,12 +3,21 @@ $data['active_menu'] = 'jadwal';
 require_once __DIR__ . '/../layouts/admin/header.php'; 
 require_once __DIR__ . '/../layouts/admin/sidebar.php'; 
 
-$jdwl =$data['jadwal_edit'];
-$transitRaw = json_decode($jdwl['stasiun_transit'], true) ?? [];
+$jdwl = $data['jadwal_edit'];
+
+// PERBAIKAN: Normalisasi JSON transit untuk mencegah double-encoded string
+$transitRaw = json_decode($jdwl['stasiun_transit'], true);
+if (is_string($transitRaw)) {
+    $transitRaw = json_decode($transitRaw, true);
+}
+if (!is_array($transitRaw)) {
+    $transitRaw = [];
+}
 
 $transitMap = [];
-foreach($transitRaw as$item) {
-    if(is_array($item)) {$transitMap[$item['nama']] =$item['waktu'] ?? '';
+foreach($transitRaw as $item) {
+    if(is_array($item)) {
+        $transitMap[$item['nama']] = $item['waktu'] ?? '';
     } else {
         $transitMap[$item] = '';
     }
@@ -18,7 +27,7 @@ foreach($transitRaw as$item) {
     <div class="flex-1 flex flex-col min-w-0">
         <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
-                <a href="/anvo/public/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
+                <a href="/anvo/public/admin/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
@@ -29,7 +38,7 @@ foreach($transitRaw as$item) {
         </header>
 
         <main class="flex-1 p-8 lg:p-10 overflow-y-auto">
-            <form id="form-jadwal-edit" action="/anvo/public/jadwal/update" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <form id="form-jadwal-edit" action="/anvo/public/admin/jadwal/update" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <input type="hidden" name="id_jadwal" value="<?= $jdwl['id_jadwal'] ?>">
                 
                 <input type="hidden" name="stasiun_transit" id="input-transit-json-edit">
@@ -50,8 +59,8 @@ foreach($transitRaw as$item) {
                             <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Koridor Jalur</label>
                             <select id="select-koridor-edit" name="id_koridor" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
                                 <option value="">-- Pilih Koridor --</option>
-                                <?php foreach($data['koridor_list'] ?? [] as$kor): ?>
-                                    <option value="<?= $kor['id_koridor'] ?>" <?= ($jdwl['id_koridor'] ==$kor['id_koridor']) ? 'selected' : '' ?>>
+                                <?php foreach($data['koridor_list'] ?? [] as $kor): ?>
+                                    <option value="<?= $kor['id_koridor'] ?>" <?= ($jdwl['id_koridor'] == $kor['id_koridor']) ? 'selected' : '' ?>>
                                         <?= $kor['nama_koridor'] ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -125,7 +134,7 @@ foreach($transitRaw as$item) {
                     </div>
 
                     <div class="flex justify-end gap-3">
-                        <a href="/anvo/public/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal Edit</a>
+                        <a href="/anvo/public/admin/jadwal" class="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-semibold text-sm transition-all">Batal Edit</a>
                         <button type="submit" class="px-8 py-3.5 bg-[#8C6239] hover:bg-[#74502e] text-white rounded-2xl font-semibold text-sm transition-all shadow-md">
                             Simpan Perubahan Jadwal
                         </button>
@@ -180,7 +189,7 @@ foreach($transitRaw as$item) {
         window.addEventListener('DOMContentLoaded', () => {
             const idKoridorAwal = document.getElementById('select-koridor-edit').value;
             if(idKoridorAwal) {
-                fetch('/anvo/public/jadwal/get_stasiun_ajax/' + idKoridorAwal)
+                fetch('/anvo/public/admin/jadwal/get_stasiun_ajax/' + idKoridorAwal)
                 .then(r => r.json())
                 .then(data => {
                     currentStations = data;
@@ -205,7 +214,7 @@ foreach($transitRaw as$item) {
                 return;
             }
 
-            fetch('/anvo/public/jadwal/get_kereta_ajax/' + idKoridor)
+            fetch('/anvo/public/admin/jadwal/get_kereta_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
                     selectArmada.innerHTML = '<option value="">-- Pilih Armada Kereta --</option>';
@@ -219,7 +228,7 @@ foreach($transitRaw as$item) {
                     selectArmada.disabled = false;
                 });
 
-            fetch('/anvo/public/jadwal/get_stasiun_ajax/' + idKoridor)
+            fetch('/anvo/public/admin/jadwal/get_stasiun_ajax/' + idKoridor)
                 .then(r => r.json())
                 .then(data => {
                     currentStations = data; 
@@ -272,4 +281,4 @@ foreach($transitRaw as$item) {
         });
     </script>
 
-<?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?> 

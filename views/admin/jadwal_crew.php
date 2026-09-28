@@ -2,18 +2,18 @@
 $data['active_menu'] = 'jadwal';
 require_once __DIR__ . '/../layouts/admin/header.php'; 
 require_once __DIR__ . '/../layouts/admin/sidebar.php'; 
-$jadwal = $data['jadwal'];
+$jadwal =$data['jadwal'];
 ?>
 
     <div class="flex-1 flex flex-col min-w-0">
         <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div class="flex items-center gap-3">
-                <a href="/anvo/public/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
+                <a href="/anvo/public/admin/jadwal" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
                     <h1 class="text-xl font-extrabold text-[#0F172A] tracking-tight">Manajemen Kru Onboard - Jadwal #<?= $jadwal['id_jadwal'] ?></h1>
-                    <p class="text-xs text-slate-400 font-medium"><?= $jadwal['stasiun_asal'] ?> → <?= $jadwal['stasiun_tujuan'] ?> (<?= date('d M Y', strtotime($jadwal['tanggal_mulai'])) ?> s.d. <?= date('d M Y', strtotime($jadwal['tanggal_akhir'])) ?>)</p>
+                    <p class="text-xs text-slate-400 font-medium"><?= $jadwal['stasiun_asal'] ?> → <?=$jadwal['stasiun_tujuan'] ?> (<?= date('d M Y', strtotime($jadwal['tanggal_mulai'])) ?> s.d. <?= date('d M Y', strtotime($jadwal['tanggal_akhir'])) ?>)</p>
                 </div>
             </div>
             <div>
@@ -25,9 +25,8 @@ $jadwal = $data['jadwal'];
 
         <main class="flex-1 p-8 lg:p-10 space-y-6 overflow-y-auto">
             
-            <!-- Filter Pencarian di Halaman Kru -->
             <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm">
-                <form action="/anvo/public/jadwal/crew/<?= $jadwal['id_jadwal'] ?>" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                <form action="/anvo/public/admin/jadwal/crew/<?= $jadwal['id_jadwal'] ?>" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
                     <div class="sm:col-span-5">
                         <label class="text-xs font-bold text-slate-500 block mb-1.5">Filter Tanggal Tugas</label>
                         <input type="date" name="tanggal_tugas" value="<?= $data['filter_tanggal'] ?>" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
@@ -40,7 +39,7 @@ $jadwal = $data['jadwal'];
                         <button type="submit" class="flex-1 bg-[#8C6239] hover:bg-[#74502e] text-white py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                             <i class="fa-solid fa-filter mr-1"></i> Cari
                         </button>
-                        <a href="/anvo/public/jadwal/crew/<?= $jadwal['id_jadwal'] ?>" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-all flex items-center justify-center" title="Reset Filter">
+                        <a href="/anvo/public/admin/jadwal/crew/<?= $jadwal['id_jadwal'] ?>" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-all flex items-center justify-center" title="Reset Filter">
                             <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     </div>
@@ -74,7 +73,7 @@ $jadwal = $data['jadwal'];
                                     <td colspan="7" class="py-12 text-center text-slate-400 font-medium text-xs">Belum ada kru yang ditugaskan pada jadwal ini.</td>
                                 </tr>
                             <?php else: ?>
-                                <?php $no = 1; foreach($data['kru_assigned'] as $kr): ?>
+                                <?php $no = 1; foreach($data['kru_assigned'] as$kr): ?>
                                     <tr class="hover:bg-slate-50/60 transition-colors">
                                         <td class="py-4 px-4 font-bold text-slate-500"><?= $no++ ?></td>
                                         <td class="py-4 px-4 font-semibold text-slate-700"><?= date('d M Y', strtotime($kr['tanggal_tugas'])) ?></td>
@@ -90,7 +89,7 @@ $jadwal = $data['jadwal'];
                                             </a>
                                         </td>
                                         <td class="py-4 px-4 text-center">
-                                            <a href="/anvo/public/jadwal/hapus_crew/<?= $kr['id_penugasan'] ?>/<?= $jadwal['id_jadwal'] ?>" onclick="return confirm('Peringatan: Apakah Anda yakin ingin menghapus penugasan kru ini?')" class="p-2 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all inline-block" title="Hapus Penugasan">
+                                            <a href="/anvo/public/admin/jadwal/hapus_crew/<?= $kr['id_penugasan'] ?>/<?=$jadwal['id_jadwal'] ?>" onclick="return confirm('Peringatan: Apakah Anda yakin ingin menghapus penugasan kru ini?')" class="p-2 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all inline-block" title="Hapus Penugasan">
                                                 <i class="fa-solid fa-trash-can"></i> Hapus
                                             </a>
                                         </td>
@@ -115,12 +114,12 @@ $jadwal = $data['jadwal'];
                 <button onclick="closeModal('modal-tambah-crew')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="/anvo/public/jadwal/tambah_crew" method="POST" class="space-y-4">
+            <form action="/anvo/public/admin/jadwal/tambah_crew" method="POST" class="space-y-4">
                 <input type="hidden" name="id_jadwal" value="<?= $jadwal['id_jadwal'] ?>">
 
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Pilih Tanggal Tugas Operasional</label>
-                    <input type="date" name="tanggal_tugas" min="<?= $jadwal['tanggal_mulai'] ?>" max="<?= $jadwal['tanggal_akhir'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
+                    <input type="date" id="input-tanggal-tugas" name="tanggal_tugas" min="<?= $jadwal['tanggal_mulai'] ?>" max="<?= $jadwal['tanggal_akhir'] ?>" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
                     <span class="text-[10px] text-slate-400 mt-1 block">Rentang jadwal valid: <?= date('d M Y', strtotime($jadwal['tanggal_mulai'])) ?> s.d. <?= date('d M Y', strtotime($jadwal['tanggal_akhir'])) ?></span>
                 </div>
 
@@ -129,13 +128,13 @@ $jadwal = $data['jadwal'];
                     <input type="text" id="search-kru-input" placeholder="Ketik nama atau NIP/NIK untuk memfilter..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-medium mb-3 focus:outline-none focus:border-[#8C6239]">
                     
                     <div id="list-kru-container" class="max-h-60 overflow-y-auto space-y-2 border border-slate-100 p-3 rounded-2xl bg-slate-50">
-                        <?php foreach($data['master_kru'] as $mk): ?>
+                        <?php foreach($data['master_kru'] as$mk): ?>
                             <label class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200/60 hover:border-[#8C6239] cursor-pointer transition-all kru-item">
                                 <div class="flex items-center gap-3">
                                     <input type="checkbox" name="id_kru[]" value="<?= $mk['id_kru'] ?>" class="w-4 h-4 rounded text-[#8C6239] focus:ring-[#8C6239]">
                                     <div>
                                         <span class="font-bold text-xs text-[#0F172A] block kru-nama"><?= $mk['nama_lengkap'] ?></span>
-                                        <span class="text-[10px] text-slate-400 kru-nip">NIP: <?= $mk['nip'] ?> | NIK: <?= $mk['nik'] ?></span>
+                                        <span class="text-[10px] text-slate-400 kru-nip">NIP: <?= $mk['nip'] ?> \vert{} NIK: <?=$mk['nik'] ?></span>
                                     </div>
                                 </div>
                                 <span class="text-[10px] bg-sky-50 text-[#2B9BFB] px-2 py-0.5 rounded font-bold"><?= $mk['posisi'] ?></span>
@@ -152,7 +151,6 @@ $jadwal = $data['jadwal'];
     </div>
 
     <script>
-        // Fitur Pencarian Instan Nama/NIP Kru di dalam Modal
         document.getElementById('search-kru-input').addEventListener('input', function() {
             const keyword = this.value.toLowerCase();
             const items = document.querySelectorAll('.kru-item');
@@ -168,17 +166,15 @@ $jadwal = $data['jadwal'];
             });
         });
 
-        // AJAX Otomatis Checkbox Berdasarkan Tanggal Tugas yang Dipilih di Modal
         document.getElementById('input-tanggal-tugas').addEventListener('change', function() {
             const tanggal = this.value;
             const idJadwal = <?= $jadwal['id_jadwal'] ?>;
             
-            // Reset semua checkbox terlebih dahulu
             document.querySelectorAll('#list-kru-container input[type="checkbox"]').forEach(cb => cb.checked = false);
 
             if (!tanggal) return;
 
-            fetch(`/anvo/public/jadwal/get_kru_assigned_ajax/${idJadwal}?tanggal=${tanggal}`)
+            fetch(`/anvo/public/admin/jadwal/get_kru_assigned_ajax/${idJadwal}?tanggal=${tanggal}`)
                 .then(response => response.json())
                 .then(assignedIds => {
                     assignedIds.forEach(idKru => {

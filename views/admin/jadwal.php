@@ -8,7 +8,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-    <!-- Penyesuaian Style Dasar DataTables agar rapi dengan Tailwind -->
     <style>
         .dataTables_wrapper .dataTables_filter input { border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.3rem 0.75rem; outline: none; margin-left: 0.5rem; }
         .dataTables_wrapper .dataTables_filter input:focus { border-color: #8C6239; }
@@ -20,7 +19,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     </style>
 
     <div class="flex-1 flex flex-col min-w-0">
-        <!-- TOP BAR -->
         <header class="h-20 bg-white border-b border-slate-200/60 px-8 flex justify-between items-center sticky top-0 z-50 shadow-sm">
             <div>
                 <h1 class="text-xl font-extrabold text-[#0F172A] tracking-tight">Manajemen Kelola Jadwal & Filter</h1>
@@ -28,7 +26,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
             </div>
 
             <div>
-                <a href="/anvo/public/jadwal/tambah_page" class="bg-[#0F172A] hover:bg-[#8C6239] text-white px-5 py-3 rounded-2xl text-xs font-semibold transition-all shadow-md flex items-center gap-2">
+                <a href="/anvo/public/admin/jadwal/tambah_page" class="bg-[#0F172A] hover:bg-[#8C6239] text-white px-5 py-3 rounded-2xl text-xs font-semibold transition-all shadow-md flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Buat Jadwal Baru
                 </a>
             </div>
@@ -47,7 +45,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
             <!-- KOTAK FILTER PENCARIAN -->
             <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm">
-                <form action="/anvo/public/jadwal" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <form action="/anvo/public/admin/jadwal" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                     <div>
                         <label class="text-xs font-bold text-slate-500 block mb-1.5">Filter Tanggal</label>
                         <input type="date" name="tanggal" value="<?= $data['filter']['tanggal'] ?>" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-[#8C6239]">
@@ -94,7 +92,7 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                         <button type="submit" class="flex-1 bg-[#8C6239] hover:bg-[#74502e] text-white py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                             <i class="fa-solid fa-filter mr-1"></i> Cari
                         </button>
-                        <a href="/anvo/public/jadwal" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-all text-center flex items-center justify-center" title="Reset Filter">
+                        <a href="/anvo/public/admin/jadwal" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-all text-center flex items-center justify-center" title="Reset Filter">
                             <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     </div>
@@ -128,7 +126,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                             <?php if(!empty($data['jadwal'])): ?>
                                 <?php $no = 1; foreach($data['jadwal'] as $j): ?>
                                     <?php 
-                                        // AMAN DARI FATAL ERROR: Normalisasi JSON untuk Modal
                                         $transitRaw = json_decode($j['stasiun_transit'], true);
                                         if (is_string($transitRaw)) { $transitRaw = json_decode($transitRaw, true); }
                                         
@@ -192,7 +189,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                             Rp <?= number_format($j['harga'], 0, ',', '.') ?>
                                         </td>
                                         
-                                        <!-- Tombol Modal MAP -->
                                         <td class="py-4 px-4 text-center">
                                             <button type="button" onclick="openModal('modal-map-<?= $j['id_jadwal'] ?>')" class="w-10 h-10 bg-indigo-50 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-xl text-sm transition-all shadow-sm flex items-center justify-center mx-auto" title="Lihat Peta Rute">
                                                 <i class="fa-solid fa-map-location-dot"></i>
@@ -204,13 +200,13 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                                 <button type="button" onclick="openModal('modal-detail-<?= $j['id_jadwal'] ?>')" class="px-2.5 py-1.5 bg-sky-50 text-[#2B9BFB] hover:bg-[#2B9BFB] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Detail">
                                                     <i class="fa-solid fa-circle-info"></i> Detail
                                                 </button>
-                                                <a href="/anvo/public/jadwal/edit_page/<?= $j['id_jadwal'] ?>" class="px-2.5 py-1.5 bg-amber-50 text-[#8C6239] hover:bg-[#8C6239] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Edit">
+                                                <a href="/anvo/public/admin/jadwal/edit_page/<?= $j['id_jadwal'] ?>" class="px-2.5 py-1.5 bg-amber-50 text-[#8C6239] hover:bg-[#8C6239] hover:text-white rounded-xl text-xs font-semibold transition-all" title="Edit">
                                                     <i class="fa-solid fa-pen-to-square"></i> Edit
                                                 </a>
-                                                <a href="/anvo/public/jadwal/crew/<?= $j['id_jadwal'] ?>" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-semibold transition-all" title="Penugasan Crew">
+                                                <a href="/anvo/public/admin/jadwal/crew/<?= $j['id_jadwal'] ?>" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-semibold transition-all" title="Penugasan Crew">
                                                     <i class="fa-solid fa-user-shield"></i> Crew
                                                 </a>
-                                                <a href="/anvo/public/jadwal/hapus/<?= $j['id_jadwal'] ?>" onclick="return confirm('Hapus jadwal ini?')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
+                                                <a href="/anvo/public/admin/jadwal/hapus/<?= $j['id_jadwal'] ?>" onclick="return confirm('Hapus jadwal ini?')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl text-xs transition-all" title="Hapus">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </div>
@@ -327,7 +323,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
     </div>
 
     <script>
-        // Init DataTables (Fitur Tabel Paginated & Sortir)
         $(document).ready(function() {
             $('#jadwalTable').DataTable({
                 "language": {
@@ -345,12 +340,11 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                     }
                 },
                 "columnDefs": [
-                    { "orderable": false, "targets": [0, 6, 7] } // Index 0 (No.), 6 (Map), 7 (Aksi) tidak bisa disortir
+                    { "orderable": false, "targets": [0, 6, 7] }
                 ]
             });
         });
 
-        // FUNGSI UNTUK MEMBUKA DAN MENUTUP MODAL
         function openModal(id) {
             const modal = document.getElementById(id);
             if (modal) {
@@ -389,6 +383,4 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
         });
     </script>
 
-<?php 
-require_once __DIR__ . '/../layouts/admin/footer.php'; 
-?>
+<?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>

@@ -64,28 +64,36 @@ class AdminModel {
 
         $filtered = [];
         foreach ($rawJadwal as $j) {
-            // Normalisasi JSON yang mungkin double-encoded atau format lama
             $transit = json_decode($j['stasiun_transit'], true);
             if (is_string($transit)) {
                 $transit = json_decode($transit, true); 
             }
             
-            $transitNamas = [];
+            $validStoppingStations = []; // Stasiun tempat kereta berhenti (asal, tujuan, transit)
+            $passedStations = [];        // Stasiun yang hanya dilewati (tanpa berhenti)
+
             if (is_array($transit)) {
                 foreach ($transit as $t) {
-                    $transitNamas[] = is_array($t) ? ($t['nama'] ?? '') : $t;
+                    $namaStasiun = is_array($t) ? ($t['nama'] ?? '') : $t;
+                    $statusStasiun = is_array($t) ? strtolower($t['status'] ?? 'transit') : 'transit';
+                    
+                    if (strpos($statusStasiun, 'dilewati') !== false || strpos($statusStasiun, 'langsung') !== false) {
+                        $passedStations[] = $namaStasiun;
+                    } else {
+                        $validStoppingStations[] = $namaStasiun;
+                    }
                 }
             } else {
-                $transitNamas = [$j['stasiun_asal'], $j['stasiun_tujuan']];
+                $validStoppingStations = [$j['stasiun_asal'], $j['stasiun_tujuan']];
             }
 
             $match = true;
 
-            // 1. Cek Stasiun Asal
+            // 1. Cek Stasiun Asal (Harus ada di stasiun tempat kereta berhenti/valid)
             if (!empty($asal)) {
                 $foundAsal = false;
                 $asalIdx = -1;
-                foreach ($transitNamas as $idx => $st) {
+                foreach ($validStoppingStations as $idx => $st) {
                     if (stripos($st, $asal) !== false) {
                         $foundAsal = true;
                         $asalIdx = $idx;
@@ -99,7 +107,7 @@ class AdminModel {
             if (!empty($tujuan) && $match) {
                 $foundTujuan = false;
                 $tujuanIdx = -1;
-                foreach ($transitNamas as $idx => $st) {
+                foreach ($validStoppingStations as $idx => $st) {
                     if (stripos($st, $tujuan) !== false) {
                         $foundTujuan = true;
                         $tujuanIdx = $idx;
@@ -466,7 +474,7 @@ class AdminModel {
     }
 
     public function getSchedulesOverlap($start_date, $end_date, $kelas = '', $asal = '', $tujuan = '') {
-        $sql = "SELECT jadwal.*, kereta.nama_kereta, kereta.jenis_kelas 
+        $sql = "SELECT jadwal.*, kereta.nama_kereta, kereta.jenis_kelas, kereta.layout_kursi, kereta.kapasitas_kursi 
                 FROM jadwal 
                 JOIN kereta ON jadwal.id_kereta = kereta.id_kereta 
                 WHERE jadwal.tanggal_mulai <= :end_date 
@@ -489,20 +497,29 @@ class AdminModel {
             $transit = json_decode($j['stasiun_transit'], true);
             if (is_string($transit)) { $transit = json_decode($transit, true); }
             
-            $transitNamas = [];
+            $validStoppingStations = []; 
+            $passedStations = [];        
+
             if (is_array($transit)) {
                 foreach ($transit as $t) {
-                    $transitNamas[] = is_array($t) ? ($t['nama'] ?? '') : $t;
+                    $namaStasiun = is_array($t) ? ($t['nama'] ?? '') : $t;
+                    $statusStasiun = is_array($t) ? strtolower($t['status'] ?? 'transit') : 'transit';
+                    
+                    if (strpos($statusStasiun, 'dilewati') !== false || strpos($statusStasiun, 'langsung') !== false) {
+                        $passedStations[] = $namaStasiun;
+                    } else {
+                        $validStoppingStations[] = $namaStasiun;
+                    }
                 }
             } else {
-                $transitNamas = [$j['stasiun_asal'], $j['stasiun_tujuan']];
+                $validStoppingStations = [$j['stasiun_asal'], $j['stasiun_tujuan']];
             }
 
             $match = true;
             if (!empty($asal)) {
                 $foundAsal = false;
                 $asalIdx = -1;
-                foreach ($transitNamas as $idx => $st) {
+                foreach ($validStoppingStations as $idx => $st) {
                     if (stripos($st, $asal) !== false) {
                         $foundAsal = true;
                         $asalIdx = $idx;
@@ -515,7 +532,7 @@ class AdminModel {
             if (!empty($tujuan) && $match) {
                 $foundTujuan = false;
                 $tujuanIdx = -1;
-                foreach ($transitNamas as $idx => $st) {
+                foreach ($validStoppingStations as $idx => $st) {
                     if (stripos($st, $tujuan) !== false) {
                         $foundTujuan = true;
                         $tujuanIdx = $idx;

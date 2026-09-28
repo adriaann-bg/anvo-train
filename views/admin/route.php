@@ -57,7 +57,8 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                                 </div>
                                 <div class="pt-3 border-t border-slate-200/60 flex justify-between items-center text-xs">
                                     <span class="text-slate-500 font-medium"><i class="fa-solid fa-train-subway mr-1 text-[#8C6239]"></i> Jalur Linier Siap</span>
-                                    <a href="/anvo/public/route/detail/<?= $k['id_koridor'] ?>" class="px-4 py-2 bg-[#0F172A] hover:bg-[#8C6239] text-white rounded-xl font-semibold transition-all">
+                                    <!-- Diperbarui ke jalur admin -->
+                                    <a href="/anvo/public/admin/route/detail/<?= $k['id_koridor'] ?>" class="px-4 py-2 bg-[#0F172A] hover:bg-[#8C6239] text-white rounded-xl font-semibold transition-all">
                                         Kelola Jalur →
                                     </a>
                                 </div>
@@ -78,7 +79,8 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
                 <button onclick="closeModal('modal-tambah-koridor')" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form action="/anvo/public/route/tambah_koridor" method="POST" class="space-y-4">
+            <!-- Diperbarui ke jalur admin -->
+            <form action="/anvo/public/admin/route/tambah_koridor" method="POST" class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-slate-500 block mb-1.5">Nama Koridor</label>
                     <input type="text" name="nama_koridor" placeholder="Contoh: Koridor Utama Jakarta - Bandung" required class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-[#8C6239]">
@@ -94,22 +96,6 @@ require_once __DIR__ . '/../layouts/admin/sidebar.php';
 
     <script>
         setTimeout(() => { const el = document.getElementById('flash-alert'); if(el) el.remove(); }, 3000);
-
-        $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "language": {
-                    "lengthMenu": "Tampilkan _MENU_ data",
-                    "zeroRecords": "Tidak ada data yang ditemukan",
-                    "info": "Halaman _PAGE_ dari _PAGES_",
-                    "infoEmpty": "Tidak ada data",
-                    "search": "Cari:",
-                    "paginate": { "first": "Awal", "last": "Akhir", "next": "Lanjut", "previous": "Kembali" }
-                },
-                "columnDefs": [
-                    { "orderable": false, "targets": [0, -1] } // Nonaktifkan sortir untuk kolom No (0) dan Aksi (terakhir)
-                ]
-            });
-        });
     </script>
 
 <?php require_once __DIR__ . '/../layouts/admin/footer.php'; ?>

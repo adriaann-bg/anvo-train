@@ -3,22 +3,46 @@
 
 class KruController extends Controller {
 
-    public function index() {
+    public function __construct() {
         if (session_status() == PHP_SESSION_NONE) { session_start(); }
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /anvo/public/auth/login');
+            exit;
+        }
+
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT role FROM users WHERE nik = :nik LIMIT 1");
+        $stmt->execute([':nik' => $_SESSION['user_id']]);
+        $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$currentUser || $currentUser['role'] !== 'admin') {
+            $_SESSION['error'] = 'Akses ditolak!';
+            header('Location: /anvo/public/');
+            exit;
+        }
+    }
+    
+    private function renderAdminView($viewName, $data = []) {
+        $this->view('layouts/admin/header', $data);
+        $this->view('layouts/admin/sidebar', $data);
+        $this->view('admin/' . $viewName, $data);
+    }
+    
+    public function index() {
         $adminModel = $this->model('AdminModel');
 
         $data['judul'] = 'Master Kru - ANVO Admin';
+        $data['active_menu'] = 'kru';
         $data['kru_list'] = $adminModel->getAllMasterKru();
 
-        $this->view('admin/kru_master', $data);
+        $this->renderAdminView('kru_master', $data);
     }
 
     public function tambah() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $adminModel = $this->model('AdminModel');
-            if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
-            // Handle Upload Foto
             $fotoName = 'default-kru.png';
             if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
                 $fileTmpPath = $_FILES['foto']['tmp_name'];
@@ -42,7 +66,7 @@ class KruController extends Controller {
             } else {
                 $_SESSION['error'] = 'Gagal menambahkan kru (NIP/NIK sudah terdaftar).';
             }
-            header('Location: /anvo/public/kru');
+            header('Location: /anvo/public/admin/kru');
             exit;
         }
     }
@@ -50,7 +74,6 @@ class KruController extends Controller {
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $adminModel = $this->model('AdminModel');
-            if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
             $fotoName = null;
             if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
@@ -75,21 +98,22 @@ class KruController extends Controller {
             } else {
                 $_SESSION['error'] = 'Gagal memperbarui data kru.';
             }
-            header('Location: /anvo/public/kru');
+            // Diperbarui agar mengarah ke jalur admin
+            header('Location: /anvo/public/admin/kru');
             exit;
         }
     }
 
     public function hapus($id) {
         $adminModel = $this->model('AdminModel');
-        if (session_status() == PHP_SESSION_NONE) { session_start(); }
 
         if ($adminModel->hapusKru($id)) {
             $_SESSION['success'] = 'Data kru berhasil dihapus.';
         } else {
             $_SESSION['error'] = 'Gagal menghapus kru.';
         }
-        header('Location: /anvo/public/kru');
+        // Diperbarui agar mengarah ke jalur admin
+        header('Location: /anvo/public/admin/kru');
         exit;
     }
 }
