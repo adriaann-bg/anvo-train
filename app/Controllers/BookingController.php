@@ -12,6 +12,11 @@ class BookingController extends Controller {
     }
 
     public function index() {
+        // Hancurkan sesi pemesanan lama jika user sengaja kembali ke halaman awal (Reset Sesi)
+        unset($_SESSION['booking_search']);
+        unset($_SESSION['booking_step_pulang']);
+        unset($_SESSION['booking_jadwal_berangkat']);
+        
         $db = Database::getInstance()->getConnection();
         $stasiunStmt = $db->query("SELECT * FROM stasiun ORDER BY nama_stasiun ASC");
         
@@ -19,9 +24,9 @@ class BookingController extends Controller {
         $data['active_menu'] = 'beli_tiket';
         $data['stasiun_list'] = $stasiunStmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $this->view('layouts/header', $data); // Disesuaikan
+        $this->view('layouts/header', $data);
         $this->view('booking/index', $data);
-        $this->view('layouts/footer');        // Disesuaikan
+        $this->view('layouts/footer');
     }
 
     public function jadwal() {
@@ -29,17 +34,24 @@ class BookingController extends Controller {
         $asal = $_GET['asal'] ?? '';
         $tujuan = $_GET['tujuan'] ?? '';
         $tanggal = $_GET['tanggal'] ?? date('Y-m-d');
-        $tanggal_pulang = $_GET['tanggal_pulang'] ?? ''; // Ditangkap jika ada
+        $tanggal_pulang = $_GET['tanggal_pulang'] ?? '';
         $kelas = $_GET['kelas'] ?? '';
         $penumpang = $_GET['penumpang'] ?? 1;
 
-        // Simpan ke session untuk step selanjutnya termasuk tanggal pulang
-        $_SESSION['booking_search'] = compact('asal', 'tujuan', 'tanggal', 'tanggal_pulang', 'kelas', 'penumpang');
+        // Cek apakah ini mode pencarian jadwal kepulangan
+        $is_pulang = isset($_GET['is_pulang']) && $_GET['is_pulang'] == '1';
 
-        $data['judul'] = 'Pilih Jadwal Keberangkatan - ANVO';
+        // Hanya simpan sesi pencarian utama jika ini jadwal berangkat
+        if (!$is_pulang) {
+            $_SESSION['booking_search'] = compact('asal', 'tujuan', 'tanggal', 'tanggal_pulang', 'kelas', 'penumpang');
+        }
+
+        $data['judul'] = $is_pulang ? 'Pilih Jadwal Kepulangan - ANVO' : 'Pilih Jadwal Keberangkatan - ANVO';
         $data['active_menu'] = 'beli_tiket';
+        $data['is_pulang'] = $is_pulang;
+        $data['search'] = $is_pulang ? compact('asal', 'tujuan', 'tanggal', 'kelas', 'penumpang') : $_SESSION['booking_search'];
+        
         $data['jadwal_list'] = $bookingModel->searchJadwal($asal, $tujuan, $tanggal, $kelas);
-        $data['search'] = $_SESSION['booking_search'];
 
         $this->view('layouts/header', $data);
         $this->view('booking/jadwal', $data);
@@ -295,5 +307,46 @@ class BookingController extends Controller {
         $this->view('layouts/header', $data); // Disesuaikan
         $this->view('user/tickets', $data);
         $this->view('layouts/footer');        // Disesuaikan
+    }
+
+    // Method baru untuk mengatur rute klik tombol "Pilih Sekarang"
+    public function proses_pilih_jadwal($id_jadwal) {
+        if (!isset($_SESSION['booking_search'])) {
+            header('Location: /anvo/public/booking');
+            exit;
+        }
+
+        // Cek apakah data pencarian memiliki tanggal pulang
+        $has_pulang = !empty($_SESSION['booking_search']['tanggal_pulang']);
+
+        // Jika ada tanggal pulang dan belum masuk sesi memilih kepulangan
+        if ($has_pulang && !isset($_SESSION['booking_step_pulang'])) {
+            $_SESSION['booking_step_pulang'] = true; // Tandai bahwa sekarang masuk mode pulang
+            $_SESSION['booking_jadwal_berangkat'] = $id_jadwal; // Simpan jadwal berangkat
+            
+            // Putar balik asal dan tujuan
+            $asal_baru = $_SESSION['booking_search']['tujuan'];
+            $tujuan_baru = $_SESSION['booking_search']['asal'];
+            $tanggal_baru = $_SESSION['booking_search']['tanggal_pulang'];
+            
+            // Redirect ke halaman jadwal dengan rute terbalik
+            $url = "/anvo/public/booking/jadwal?asal=" . urlencode($asal_baru) . "&tujuan=" . urlencode($tujuan_baru) . "&tanggal=" . urlencode($tanggal_baru) . "&is_pulang=1";
+            header("Location: " . $url);
+            exit;
+        }
+
+        // Jika ini adalah jadwal tunggal ATAU jadwal kepulangan sudah dipilih
+        if ($has_pulang) {
+            $_SESSION['booking_jadwal_pulang'] = $id_jadwal;
+            // Catatan: Karena modul identitas dan kursi saat ini dibuat untuk 1 jadwal, 
+            // Untuk sementara kita gunakan id keberangkatan untuk diteruskan. 
+            // Modul Booking Multitrip (PP) butuh perombakan tabel, kita arahkan ke identitas dulu.
+            $id_terpilih = $_SESSION['booking_jadwal_berangkat']; 
+        } else {
+            $id_terpilih = $id_jadwal;
+        }
+
+        header('Location: /anvo/public/booking/identitas/' . $id_terpilih);
+        exit;
     }
 }

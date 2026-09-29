@@ -35,8 +35,7 @@
         <h2 class="text-2xl font-bold text-center text-[#0F172A] mb-8">Beli Tiket</h2>
         
         <!-- Tambahkan onsubmit untuk validasi wajib isi & tanggal kembali opsional -->
-        <!-- Ubah tag form pembuka menjadi 4 kolom agar simetris -->
-        <form action="/anvo/public/booking/jadwal" method="GET" onsubmit="return validateSearchForm()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-6">
+        <form action="/anvo/public/booking/jadwal" method="GET" onsubmit="return validateSearchForm()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
             
             <!-- Keberangkatan (Asal) -->
             <div class="relative custom-dropdown" data-target="asal">
@@ -398,22 +397,70 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
 </style>
 <script>
-    
-    // 1. Logika Switch Tanggal Pulang
-    document.getElementById('toggle-pulang').addEventListener('change', function() {
-        const input = document.getElementById('input-pulang');
-        if(this.checked) {
-            input.disabled = false;
-            input.classList.remove('opacity-50', 'cursor-not-allowed');
-            input.value = new Date().toISOString().split('T')[0]; // Set default hari ini jika dicentang
-        } else {
-            input.disabled = true;
-            input.classList.add('opacity-50', 'cursor-not-allowed');
-            input.value = ''; 
+    // Inisialisasi: Cegah pemilihan tanggal masa lalu dan atur batasan max 30 hari
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const inputTanggalBerangkat = document.getElementById('input-tanggal');
+        const inputTanggalPulang = document.getElementById('input-pulang');
+
+        if (inputTanggalBerangkat) {
+            inputTanggalBerangkat.min = today;
+        }
+
+        function updateReturnDateConstraints() {
+            if (!inputTanggalBerangkat.value) return;
+            
+            const depDateStr = inputTanggalBerangkat.value;
+            inputTanggalPulang.min = depDateStr;
+
+            // Hitung batas maksimal 30 hari dari tanggal keberangkatan
+            let maxDate = new Date(depDateStr);
+            maxDate.setDate(maxDate.getDate() + 30);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            inputTanggalPulang.max = maxDateStr;
+
+            // Jika tanggal pulang melebihi batas 30 hari, sesuaikan otomatis
+            if (inputTanggalPulang.value && inputTanggalPulang.value > maxDateStr) {
+                inputTanggalPulang.value = maxDateStr;
+            }
+            // Jika tanggal pulang lebih kecil dari keberangkatan, sesuaikan otomatis
+            if (inputTanggalPulang.value && inputTanggalPulang.value < depDateStr) {
+                inputTanggalPulang.value = depDateStr;
+            }
+        }
+
+        if (inputTanggalBerangkat) {
+            inputTanggalBerangkat.addEventListener('change', updateReturnDateConstraints);
         }
     });
 
-    // 2. Validasi Sebelum Form Dikirim (Wajib Semua, Tanggal Kembali Opsional Sesuai Toggle)
+    // 1. Logika Switch Tanggal Pulang
+    document.getElementById('toggle-pulang').addEventListener('change', function() {
+        const inputPulang = document.getElementById('input-pulang');
+        const inputBerangkat = document.getElementById('input-tanggal').value;
+        const today = new Date().toISOString().split('T')[0];
+
+        if(this.checked) {
+            inputPulang.disabled = false;
+            inputPulang.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            const minDate = (inputBerangkat && inputBerangkat > today) ? inputBerangkat : today;
+            inputPulang.min = minDate;
+            
+            // Tentukan max date (30 hari dari tanggal berangkat)
+            let maxDate = new Date(minDate);
+            maxDate.setDate(maxDate.getDate() + 30);
+            inputPulang.max = maxDate.toISOString().split('T')[0];
+
+            inputPulang.value = minDate; 
+        } else {
+            inputPulang.disabled = true;
+            inputPulang.classList.add('opacity-50', 'cursor-not-allowed');
+            inputPulang.value = ''; 
+        }
+    });
+
+    // 2. Validasi Sebelum Form Dikirim 
     function validateSearchForm() {
         const asal = document.getElementById('input-asal').value;
         const tujuan = document.getElementById('input-tujuan').value;
@@ -421,7 +468,6 @@
         const isPulangActive = document.getElementById('toggle-pulang').checked;
         const tanggalPulang = document.getElementById('input-pulang').value;
         const penumpang = document.getElementById('input-penumpang').value;
-        const kelas = document.getElementById('input-kelas').value;
 
         if (!asal) {
             alert('Mohon pilih kota keberangkatan terlebih dahulu.');
@@ -439,23 +485,45 @@
             alert('Mohon tentukan tanggal keberangkatan.');
             return false;
         }
-        // Jika switch pulang aktif, tanggal kembali wajib diisi
         if (isPulangActive && !tanggalPulang) {
             alert('Mohon tentukan tanggal kembali karena opsi pulang aktif.');
             return false;
         }
+        
+        // Validasi Tanggal Kembali (Minimal sama dengan keberangkatan & Maksimal 30 hari)
+        if (isPulangActive) {
+            const depDate = new Date(tanggal);
+            const retDate = new Date(tanggalPulang);
+            
+            if (retDate < depDate) {
+                alert('Tanggal kembali tidak boleh lebih awal dari tanggal keberangkatan!');
+                return false;
+            }
+
+            const maxAllowedDate = new Date(tanggal);
+            maxAllowedDate.setDate(maxAllowedDate.getDate() + 30);
+            
+            if (retDate > maxAllowedDate) {
+                alert('Maksimal pengambilan tanggal kembali adalah 30 hari dari tanggal keberangkatan!');
+                return false;
+            }
+        }
+
         if (!penumpang) {
             alert('Mohon pilih jumlah penumpang.');
-            return false;
-        }
-        if (!kelas) {
-            alert('Mohon pilih kelas armada.');
             return false;
         }
         return true;
     }
 
-    // 3. Logika Custom Dropdown
+    // 3. Pencegahan Submit dengan "Enter" secara keseluruhan form
+    document.getElementById('form-pencarian').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+        }
+    });
+
+    // 4. Logika Custom Dropdown
     function toggleDropdown(id) {
         document.querySelectorAll('[id^="dropdown-"]').forEach(el => {
             if(el.id !== id) {
@@ -475,7 +543,6 @@
         }
     }
 
-    // 4. Logika Memilih Opsi di Dropdown
     function selectOption(target, labelText, value) {
         const label = document.getElementById('label-' + target);
         label.innerText = labelText;
@@ -486,7 +553,6 @@
         toggleDropdown('dropdown-' + target);
     }
 
-    // 5. Logika Pencarian/Filter Data Dropdown
     function filterDropdown(input, listId) {
         const filter = input.value.toUpperCase();
         const ul = document.getElementById(listId);
@@ -502,7 +568,7 @@
         }
     }
 
-    // 6. Tutup dropdown jika klik di luar area
+    // Tutup dropdown jika klik di luar area
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.custom-dropdown')) {
             document.querySelectorAll('[id^="dropdown-"]').forEach(el => {

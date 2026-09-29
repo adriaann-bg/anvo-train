@@ -1,7 +1,7 @@
 <div class="max-w-3xl mx-auto py-10 px-6 space-y-6">
-    <!-- Breadcrumb -->
+    <!-- Breadcrumb dengan Alert Konfirmasi -->
     <div class="text-xs text-slate-400 font-medium flex items-center gap-2">
-        <a href="/anvo/public/booking" class="hover:text-[#8C6239]">Beli Tiket</a>
+        <a href="/anvo/public/booking" onclick="return confirm('Sesi pemesanan Anda akan dibatalkan dan data tidak tersimpan. Yakin ingin kembali ke awal?');" class="hover:text-[#8C6239]">Beli Tiket</a>
         <i class="fa-solid fa-chevron-right text-[9px]"></i>
         <span class="text-[#0F172A] font-bold">Identitas Penumpang</span>
     </div>
@@ -18,9 +18,11 @@
             <?php 
             $jumlahPenumpang =$data['search']['penumpang'] ?? 1;
             for($i = 0; $i < $jumlahPenumpang; $i++): 
-                // Set default user login ke Penumpang 1
+                // PERBAIKAN ERROR: Pastikan data user ada sebelum mengakses array
                 $isDefault = ($i == 0);
-                $defNama =$isDefault ? htmlspecialchars($data['current_user']['nama']) : '';$defNik = $isDefault ? htmlspecialchars($data['current_user']['nik']) : '';
+                $hasUser = !empty($data['current_user']);
+                $defNama = ($isDefault && $hasUser) ? htmlspecialchars($data['current_user']['nama']) : '';
+                $defNik = ($isDefault && $hasUser) ? htmlspecialchars($data['current_user']['nik']) : '';
             ?>
                 <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/60 flex justify-between items-center">
                     <div>
@@ -114,12 +116,12 @@
 </div>
 
 <script>
+    // Script validasi data kosong dan alert window
     let activeIndex = 0;
-
-    // 1. Alert Pindah Halaman
     let isFormSubmitting = false;
+
     document.getElementById('form-identitas').addEventListener('submit', function(e) {
-        isFormSubmitting = true; // Matikan alert jika submit form resmi
+        isFormSubmitting = true; 
         const max = <?= $jumlahPenumpang ?>;
         for(let i=0; i<max; i++) {
             if(!document.getElementById(`input-nama-${i}`).value) {
@@ -129,6 +131,7 @@
             }
         }
     });
+
     window.addEventListener('beforeunload', function (e) {
         if (!isFormSubmitting) {
             e.preventDefault();

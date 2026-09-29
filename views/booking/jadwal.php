@@ -2,19 +2,19 @@
     <!-- Header Informasi Pencarian -->
     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="font-extrabold text-lg text-[#0F172A]">Jadwal Keberangkatan</h1>
+            <!-- Header Dinamis: Keberangkatan / Kepulangan -->
+            <h1 class="font-extrabold text-lg <?= isset($data['is_pulang']) && $data['is_pulang'] ? 'text-[#2B9BFB]' : 'text-[#0F172A]' ?>">
+                <?= isset($data['is_pulang']) && $data['is_pulang'] ? '<i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Jadwal Kepulangan' : 'Jadwal Keberangkatan' ?>
+            </h1>
             <p class="text-xs text-slate-500 mt-1">
                 <span class="font-bold text-[#0F172A]"><?= htmlspecialchars($data['search']['asal']) ?></span> &rarr; <span class="font-bold text-[#0F172A]"><?= htmlspecialchars($data['search']['tujuan']) ?></span>
             </p>
             <p class="text-xs text-slate-400 mt-0.5">
-                Berangkat: <span class="font-semibold text-[#8C6239]"><?= date('d M Y', strtotime($data['search']['tanggal'])) ?></span>
-                <?php if(!empty($data['search']['tanggal_pulang'])): ?>
-                    | Pulang: <span class="font-semibold text-[#8C6239]"><?= date('d M Y', strtotime($data['search']['tanggal_pulang'])) ?></span>
-                <?php endif; ?>
+                Tanggal: <span class="font-semibold text-[#8C6239]"><?= date('d M Y', strtotime($data['search']['tanggal'])) ?></span>
                 | Penumpang: <?= $data['search']['penumpang'] ?> Orang
             </p>
         </div>
-        <a href="/anvo/public/booking" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Ubah Pencarian</a>
+        <a href="/anvo/public/booking" onclick="return confirm('Pencarian Anda akan direset. Lanjutkan?');" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Ubah Pencarian</a>
     </div>
 
     <!-- Tambahkan kode ini di bawah div Header Informasi Pencarian di jadwal.php -->
@@ -96,10 +96,11 @@
                             <span class="text-[10px] text-slate-500 font-bold"><?= htmlspecialchars($j['stasiun_tujuan']) ?></span>
                         </div>
                     </div>
-
-                    <!-- Tombol Pilih -->
+ 
+                    <!-- Tombol Pilih di dalam looping foreach jadwal -->
                     <div class="flex justify-end pt-2">
-                        <a href="/anvo/public/booking/identitas/<?= $j['id_jadwal'] ?>" class="px-6 py-2.5 bg-[#8C6239] hover:bg-[#74502e] text-white text-xs font-bold rounded-xl shadow-md transition-all inline-flex items-center">
+                        <!-- UBAH LINK INI MENGARAH KE PROSES PILIH JADWAL -->
+                        <a href="/anvo/public/booking/proses_pilih_jadwal/<?= $j['id_jadwal'] ?>" class="px-6 py-2.5 bg-[#8C6239] hover:bg-[#74502e] text-white text-xs font-bold rounded-xl shadow-md transition-all inline-flex items-center">
                             Pilih Sekarang <i class="fa-solid fa-chevron-right ml-1"></i>
                         </a>
                     </div>
@@ -108,3 +109,4 @@
         <?php endif; ?>
     </div>
 </div>
+
