@@ -17,6 +17,28 @@
         <a href="/anvo/public/booking" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Ubah Pencarian</a>
     </div>
 
+    <!-- Tambahkan kode ini di bawah div Header Informasi Pencarian di jadwal.php -->
+    <?php $kls_aktif = $_GET['kelas'] ?? ''; ?>
+    <div class="flex gap-3 overflow-x-auto custom-scrollbar pb-2 pt-2 border-b border-slate-100">
+        <a href="/anvo/public/booking/jadwal?asal=<?= urlencode($data['search']['asal']) ?>&tujuan=<?= urlencode($data['search']['tujuan']) ?>&tanggal=<?= urlencode($data['search']['tanggal']) ?>&penumpang=<?= $data['search']['penumpang'] ?>&kelas=" 
+           class="px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all <?= empty($kls_aktif) ? 'bg-[#0F172A] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#8C6239] hover:text-[#8C6239]' ?>">
+           Semua Kelas
+        </a>
+        <a href="/anvo/public/booking/jadwal?asal=<?= urlencode($data['search']['asal']) ?>&tujuan=<?= urlencode($data['search']['tujuan']) ?>&tanggal=<?= urlencode($data['search']['tanggal']) ?>&penumpang=<?= $data['search']['penumpang'] ?>&kelas=Executive+Prime" 
+           class="px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all <?= $kls_aktif == 'Executive Prime' ? 'bg-[#0F172A] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#8C6239] hover:text-[#8C6239]' ?>">
+           Executive Prime
+        </a>
+        <a href="/anvo/public/booking/jadwal?asal=<?= urlencode($data['search']['asal']) ?>&tujuan=<?= urlencode($data['search']['tujuan']) ?>&tanggal=<?= urlencode($data['search']['tanggal']) ?>&penumpang=<?= $data['search']['penumpang'] ?>&kelas=Luminary+Capsule" 
+           class="px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all <?= $kls_aktif == 'Luminary Capsule' ? 'bg-[#0F172A] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#8C6239] hover:text-[#8C6239]' ?>">
+           Luminary Capsule
+        </a>
+        <a href="/anvo/public/booking/jadwal?asal=<?= urlencode($data['search']['asal']) ?>&tujuan=<?= urlencode($data['search']['tujuan']) ?>&tanggal=<?= urlencode($data['search']['tanggal']) ?>&penumpang=<?= $data['search']['penumpang'] ?>&kelas=VVIP+Skybox" 
+           class="px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all <?= $kls_aktif == 'VVIP Skybox' ? 'bg-[#0F172A] text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#8C6239] hover:text-[#8C6239]' ?>">
+           VVIP Skybox
+        </a>
+        <!-- Tambahkan hal yang sama untuk Luminary Capsule dan VVIP Skybox -->
+    </div>
+
     <!-- Daftar Jadwal Kereta -->
     <div class="space-y-4">
         <?php if(empty($data['jadwal_list'])): ?>

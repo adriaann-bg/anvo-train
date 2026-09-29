@@ -69,6 +69,11 @@ class BookingController extends Controller {
         // Ambil daftar penumpang yang pernah disimpan user sebelumnya
         $savedPassengers = $bookingModel->getSavedPassengers($_SESSION['user_id']);
 
+        // AMBIL DATA USER SAAT INI UNTUK DEFAULT PENUMPANG 1
+        $stmtUser = $db->prepare("SELECT nama, nik FROM users WHERE id_user = :id");
+        $stmtUser->execute([':id' => $_SESSION['user_id']]);
+        $data['current_user'] = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
         $data['judul'] = 'Identitas Penumpang - ANVO';
         $data['active_menu'] = 'beli_tiket';
         $data['jadwal'] = $jadwal;

@@ -91,8 +91,9 @@ class BookingModel {
             $this->db->beginTransaction();
 
             // Validasi id_user agar sesuai dengan database
-            $stmtUser = $this->db->prepare("SELECT id_user FROM users WHERE id_user = :val OR nik = :val LIMIT 1");
-            $stmtUser->execute([':val' => $data['id_user']]);
+            // PENGAMAN: Cari id_user yang valid di tabel users
+            $stmtUser = $this->db->prepare("SELECT id_user FROM users WHERE id_user = :val1 OR nik = :val2 LIMIT 1");
+            $stmtUser->execute([':val1' => $data['id_user'], ':val2' => $data['id_user']]);
             $userData = $stmtUser->fetch(PDO::FETCH_ASSOC);
             $realUserId = $userData ? $userData['id_user'] : $data['id_user'];
 

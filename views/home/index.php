@@ -35,7 +35,8 @@
         <h2 class="text-2xl font-bold text-center text-[#0F172A] mb-8">Beli Tiket</h2>
         
         <!-- Tambahkan onsubmit untuk validasi wajib isi & tanggal kembali opsional -->
-        <form action="/anvo/public/booking/jadwal" method="GET" onsubmit="return validateSearchForm()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+        <!-- Ubah tag form pembuka menjadi 4 kolom agar simetris -->
+        <form action="/anvo/public/booking/jadwal" method="GET" onsubmit="return validateSearchForm()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-6">
             
             <!-- Keberangkatan (Asal) -->
             <div class="relative custom-dropdown" data-target="asal">
@@ -133,13 +134,13 @@
             </div>
 
             <!-- Kelas -->
-            <div class="relative custom-dropdown" data-target="kelas">
+            <!-- <div class="relative custom-dropdown" data-target="kelas">
                 <label class="text-sm text-gray-500 mb-2 block">Kelas Armada <span class="text-red-500">*</span></label>
                 <div class="border-b border-gray-300 py-2 flex justify-between items-center cursor-pointer hover:border-[#8C6239] transition-colors" onclick="toggleDropdown('dropdown-kelas')">
                     <span id="label-kelas" class="text-gray-400">Pilih Kelas</span>
                     <svg class="w-4 h-4 text-gray-400 dropdown-arrow transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
-                <!-- Name disesuaikan: 'kelas' -->
+                
                 <input type="hidden" name="kelas" id="input-kelas">
                 
                 <div id="dropdown-kelas" class="hidden absolute top-full left-0 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
@@ -152,7 +153,7 @@
                         <?php endforeach; ?>
                     </ul>
                 </div>
-            </div>
+            </div> -->
 
             <div class="flex flex-col md:flex-row justify-between items-center md:col-span-2 lg:col-span-3 mt-4 border-t border-gray-100 pt-6 w-full">
                 <p class="text-xs text-orange-500 flex items-center gap-2 mb-6 md:mb-0">

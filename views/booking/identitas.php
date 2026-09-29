@@ -3,15 +3,13 @@
     <div class="text-xs text-slate-400 font-medium flex items-center gap-2">
         <a href="/anvo/public/booking" class="hover:text-[#8C6239]">Beli Tiket</a>
         <i class="fa-solid fa-chevron-right text-[9px]"></i>
-        <a href="javascript:history.back()" class="hover:text-[#8C6239]">Pemilihan Jadwal</a>
-        <i class="fa-solid fa-chevron-right text-[9px]"></i>
         <span class="text-[#0F172A] font-bold">Identitas Penumpang</span>
     </div>
 
     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6 relative">
         <div class="flex justify-between items-center">
             <h1 class="text-xl font-extrabold text-[#0F172A]">Identitas Penumpang</h1>
-            <button type="button" onclick="bukaModalTambahManual()" class="bg-[#8C6239] hover:bg-[#74502e] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
+            <button type="button" onclick="bukaModalTambahManual()" class="bg-[#8C6239] hover:bg-[#74502e] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
                 <i class="fa-solid fa-plus"></i> Tambah Penumpang
             </button>
         </div>
@@ -20,27 +18,27 @@
             <?php 
             $jumlahPenumpang =$data['search']['penumpang'] ?? 1;
             for($i = 0; $i < $jumlahPenumpang; $i++): 
+                // Set default user login ke Penumpang 1
+                $isDefault = ($i == 0);
+                $defNama =$isDefault ? htmlspecialchars($data['current_user']['nama']) : '';$defNik = $isDefault ? htmlspecialchars($data['current_user']['nik']) : '';
             ?>
                 <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/60 flex justify-between items-center">
                     <div>
-                        <span class="text-[10px] font-bold text-[#8C6239] uppercase tracking-wider block mb-1">Penumpang <?= $i + 1 ?></span>
-                        <h3 id="display-nama-<?= $i ?>" class="text-sm font-extrabold text-[#0F172A]">Pilih data penumpang</h3>
-                        <p id="display-nik-<?= $i ?>" class="text-xs text-slate-400 font-mono">-</p>
+                        <span class="text-[10px] font-bold text-[#8C6239] uppercase tracking-wider block mb-1">Penumpang <?= $i + 1 ?> <?=$isDefault ? '(Pemesan)' : '' ?></span>
+                        <h3 id="display-nama-<?= $i ?>" class="text-sm font-extrabold text-[#0F172A]"><?= $defNama ?: 'Pilih data penumpang' ?></h3>
+                        <p id="display-nik-<?= $i ?>" class="text-xs text-slate-400 font-mono"><?= $defNik ? 'NIK: '.$defNik : '-' ?></p>
                     </div>
-
-                    <!-- Hidden Inputs untuk form submit -->
-                    <input type="hidden" name="penumpang[<?= $i ?>][nama]" id="input-nama-<?= $i ?>" required>
-                    <input type="hidden" name="penumpang[<?= $i ?>][nik]" id="input-nik-<?= $i ?>" required>
-
-                    <button type="button" onclick="bukaModalPilih(<?= $i ?>)" class="px-4 py-2 bg-white border border-slate-200 hover:border-[#8C6239] text-slate-700 hover:text-[#8C6239] text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1">
-                        Pilih Penumpang <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+                    <input type="hidden" name="penumpang[<?= $i ?>][nama]" id="input-nama-<?= $i ?>" value="<?= $defNama ?>" required>
+                    <input type="hidden" name="penumpang[<?= $i ?>][nik]" id="input-nik-<?= $i ?>" value="<?= $defNik ?>" required>
+                    <button type="button" onclick="bukaModalPilih(<?= $i ?>)" class="px-4 py-2 bg-white border border-slate-200 hover:border-[#8C6239] text-slate-700 text-xs font-bold rounded-xl transition-all">
+                        Ubah Penumpang <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
                     </button>
                 </div>
             <?php endfor; ?>
 
             <div class="pt-4">
-                <button type="submit" class="w-full bg-[#8C6239] hover:bg-[#74502e] text-white py-4 rounded-2xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2">
-                    Pilih Kursi <i class="fa-solid fa-chevron-right"></i>
+                <button type="submit" class="w-full bg-[#8C6239] hover:bg-[#74502e] text-white py-4 rounded-2xl font-bold text-xs shadow-md">
+                    Lanjut Pilih Kursi <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
         </form>
@@ -118,6 +116,26 @@
 <script>
     let activeIndex = 0;
 
+    // 1. Alert Pindah Halaman
+    let isFormSubmitting = false;
+    document.getElementById('form-identitas').addEventListener('submit', function(e) {
+        isFormSubmitting = true; // Matikan alert jika submit form resmi
+        const max = <?= $jumlahPenumpang ?>;
+        for(let i=0; i<max; i++) {
+            if(!document.getElementById(`input-nama-${i}`).value) {
+                e.preventDefault(); isFormSubmitting = false;
+                alert(`Data Penumpang ${i + 1} belum diisi!`);
+                return;
+            }
+        }
+    });
+    window.addEventListener('beforeunload', function (e) {
+        if (!isFormSubmitting) {
+            e.preventDefault();
+            e.returnValue = 'Data belum tersimpan. Yakin ingin meninggalkan halaman?';
+        }
+    });
+    
     function bukaModalPilih(index) {
         activeIndex = index;
         document.getElementById('modal-pilih-penumpang').classList.remove('hidden');
